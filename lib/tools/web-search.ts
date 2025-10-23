@@ -311,6 +311,8 @@ class CDSCOSearchStrategy implements SearchStrategy {
             },
           });
 
+          console.log('CDSCO results:', transformedResults);
+
           return {
             query,
             results: deduplicateByDomainAndUrl(transformedResults),
@@ -734,7 +736,7 @@ const createSearchStrategy = (
   },
 ): SearchStrategy => {
   const strategies: Record<string, () => SearchStrategy> = {
-    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'https://pyretrieval.vercel.app'),
+    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'https://pyretrieval-4zso4s8ud-pavans-projects-68879068.vercel.app'),
     parallel: () => new ParallelSearchStrategy(clients.parallel, clients.firecrawl),
     tavily: () => new TavilySearchStrategy(clients.tvly),
     firecrawl: () => new FirecrawlSearchStrategy(clients.firecrawl),

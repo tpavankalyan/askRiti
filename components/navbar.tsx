@@ -77,17 +77,17 @@ const Navbar = memo(
           )}
         >
           <div className={cn('flex items-center gap-3', isDialogOpen ? 'pointer-events-auto' : '')}>
-            <Link href="/new">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="rounded-lg bg-accent hover:bg-accent/80 group transition-all hover:scale-105 pointer-events-auto"
-              >
+            <Button
+              asChild
+              variant="secondary"
+              size="sm"
+              className="rounded-lg bg-accent hover:bg-accent/80 group transition-all hover:scale-105 pointer-events-auto"
+            >
+              <Link href="/new">
                 <PlusIcon size={16} className="group-hover:rotate-90 transition-all" />
                 <span className="text-sm ml-1.5 group-hover:block hidden animate-in fade-in duration-300">New</span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
             {/* Mobile-only Upgrade (avoids overlap with share on small screens) */}
             {user && !hasActiveSubscription && !showProLoading && (

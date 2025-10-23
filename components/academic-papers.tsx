@@ -206,11 +206,11 @@ const AcademicPapersCard = ({ results, response, args }: AcademicPapersProps) =>
     <div className="w-full my-3">
       <div className="border border-border rounded-lg overflow-hidden bg-card">
         {/* Header */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-accent/50 transition-colors"
-        >
-          <div className="flex items-center gap-2.5">
+        <div className="w-full px-4 py-2.5 flex items-center justify-between">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center gap-2.5 hover:bg-accent/50 transition-colors rounded-md px-2 py-1 -mx-2 -my-1 flex-1 text-left"
+          >
             <div className="p-1.5 rounded-md bg-muted">
               <Book className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
@@ -218,7 +218,7 @@ const AcademicPapersCard = ({ results, response, args }: AcademicPapersProps) =>
             <span className="text-[11px] text-muted-foreground">
               {totalResults} {totalResults === 1 ? 'paper' : 'papers'}
             </span>
-          </div>
+          </button>
           <div className="flex items-center gap-2">
             {totalResults > 0 && (
               <button
@@ -232,14 +232,19 @@ const AcademicPapersCard = ({ results, response, args }: AcademicPapersProps) =>
                 <ArrowUpRight className="w-3 h-3" />
               </button>
             )}
-            <ChevronDown
-              className={cn(
-                'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200',
-                isExpanded && 'rotate-180'
-              )}
-            />
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-1 hover:bg-accent/50 transition-colors rounded-md"
+            >
+              <ChevronDown
+                className={cn(
+                  'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200',
+                  isExpanded && 'rotate-180'
+                )}
+              />
+            </button>
           </div>
-        </button>
+        </div>
 
         {/* Content */}
         {isExpanded && (

@@ -315,62 +315,65 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
           </div>
         </div>
 
-        {/* Clean Action Buttons */}
-        <div className="flex flex-wrap gap-2 sm:gap-1 mt-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(
-                `https://www.google.com/maps/dir/?api=1&destination=${place.location.lat},${place.location.lng}`,
-                '_blank',
-              );
-            }}
-            className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
-          >
-            <NavigationArrowIcon size={12} />
-            Directions
-          </button>
-
-          {place.phone && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(`tel:${place.phone}`, '_blank');
-              }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
-            >
-              <PhoneIcon size={12} />
-              Call
-            </button>
-          )}
-
-          {place.website && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(place.website, '_blank');
-              }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
-            >
-              <GlobeIcon size={12} />
-              Website
-            </button>
-          )}
-
-          {place.place_id && !isOverlay && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(`https://www.google.com/maps/place/?q=place_id:${place.place_id}`, '_blank');
-              }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
-            >
-              <MapTrifold size={12} />
-              Maps
-            </button>
-          )}
-        </div>
       </div>
+    </div>
+  );
+
+  // Action buttons component
+  const ActionButtons = () => (
+    <div className="flex flex-wrap gap-2 sm:gap-1 mt-3">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          window.open(
+            `https://www.google.com/maps/dir/?api=1&destination=${place.location.lat},${place.location.lng}`,
+            '_blank',
+          );
+        }}
+        className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
+      >
+        <NavigationArrowIcon size={12} />
+        Directions
+      </button>
+
+      {place.phone && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(`tel:${place.phone}`, '_blank');
+          }}
+          className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
+        >
+          <PhoneIcon size={12} />
+          Call
+        </button>
+      )}
+
+      {place.website && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(place.website, '_blank');
+          }}
+          className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
+        >
+          <GlobeIcon size={12} />
+          Website
+        </button>
+      )}
+
+      {place.place_id && !isOverlay && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(`https://www.google.com/maps/place/?q=place_id:${place.place_id}`, '_blank');
+          }}
+          className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 transition-colors"
+        >
+          <MapTrifold size={12} />
+          Maps
+        </button>
+      )}
     </div>
   );
 
@@ -381,9 +384,16 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
           'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-3 sm:p-4 w-full',
           className,
         )}
-        onClick={onClick}
       >
-        {cardContent}
+        <button 
+          onClick={onClick} 
+          className="w-full text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg"
+        >
+          {cardContent}
+        </button>
+
+        {/* Action Buttons for Overlay */}
+        <ActionButtons />
 
         {/* Hours Section for Overlay */}
         {showHours && displayHours && displayHours.length > 0 && (
@@ -395,15 +405,22 @@ const PlaceCard: React.FC<PlaceCardProps> = ({
 
   return (
     <div
-      onClick={onClick}
       className={cn(
-        'w-full p-4 max-sm:p-3 cursor-pointer transition-colors border border-neutral-200 dark:border-neutral-800 rounded-2xl bg-white dark:bg-neutral-900',
+        'w-full p-4 max-sm:p-3 transition-colors border border-neutral-200 dark:border-neutral-800 rounded-2xl bg-white dark:bg-neutral-900',
         'hover:bg-neutral-50 dark:hover:bg-neutral-800/50',
         isSelected && 'ring-1 ring-neutral-900 dark:ring-neutral-100',
         className,
       )}
     >
-      {cardContent}
+      <button 
+        onClick={onClick} 
+        className="w-full text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg"
+      >
+        {cardContent}
+      </button>
+
+      {/* Action Buttons */}
+      <ActionButtons />
 
       {/* Hours Section */}
       {showHours && displayHours && displayHours.length > 0 && (
