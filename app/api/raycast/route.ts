@@ -2,11 +2,12 @@ import { webSearchTool } from '@/lib/tools';
 import { xSearchTool } from '@/lib/tools/x-search';
 import { groq } from '@ai-sdk/groq';
 import { xai } from '@ai-sdk/xai';
+import { openai } from '@ai-sdk/openai';
 import { convertToModelMessages, customProvider, generateText, stepCountIs } from 'ai';
 
 const scira = customProvider({
   languageModels: {
-    'scira-default': xai('grok-4-fast-reasoning'),
+    'scira-default': openai('gpt-4.1-mini'),
   },
 });
 

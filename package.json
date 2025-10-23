@@ -1,10 +1,12 @@
 {
-  "name": "scira",
+  "name": "ritivel",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev:python": "python api/server.py",
+    "dev:next": "next dev",
+    "dev": "concurrently \"pnpm run dev:python\" \"pnpm run dev:next\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -63,6 +65,7 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@radix-ui/react-visually-hidden": "^1.2.3",
     "@react-email/components": "^0.5.7",
     "@supermemory/tools": "1.2.13",
     "@t3-oss/env-nextjs": "^0.13.8",

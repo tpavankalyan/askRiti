@@ -1,4 +1,4 @@
-export function SciraLogo({
+export function RitivelLogo({
   className,
   width,
   height,

@@ -1,12 +1,12 @@
-# Scira
+# Ritivel
 
-![Scira](/app/opengraph-image.png)
+![Ritivel](/app/opengraph-image.png)
 
 A minimalistic AI-powered search engine that helps you find information on the internet.
 
-🔗 **[Try Scira at scira.ai](https://scira.ai)**
+🔗 **[Try Ritivel at ritivel.ai](https://ritivel.ai)**
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zaidmukaddam/scira)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zaidmukaddam/ritivel)
 
 ## Powered By
 

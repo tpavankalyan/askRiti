@@ -19,7 +19,7 @@ import {
 } from 'ai';
 import { createMemoryTools } from '@/lib/tools/supermemory';
 import {
-  scira,
+  ritivel,
   requiresAuthentication,
   requiresProSubscription,
   shouldBypassRateLimits,
@@ -90,7 +90,7 @@ export function getStreamContext() {
     try {
       globalStreamContext = createResumableStreamContext({
         waitUntil: after,
-        keyPrefix: 'scira-ai',
+        keyPrefix: 'ritivel-ai',
       });
     } catch (error: any) {
       if (error.message.includes('REDIS_URL')) {
@@ -125,28 +125,29 @@ export async function POST(req: Request) {
   // CRITICAL PATH: Get auth status first (required for all subsequent checks)
   const lightweightUser = await getLightweightUser();
 
-  // Rate limit check for unauthenticated users
-  if (!lightweightUser) {
-    const identifier = getClientIdentifier(req);
-    const { success, limit, reset } = await unauthenticatedRateLimit.limit(identifier);
+  // Rate limit check for unauthenticated users - DISABLED
+  // if (!lightweightUser) {
+  //   const identifier = getClientIdentifier(req);
+  //   const { success, limit, reset } = await unauthenticatedRateLimit.limit(identifier);
 
-    if (!success) {
-      const resetDate = new Date(reset);
-      return new ChatSDKError(
-        'rate_limit:api',
-        `You've reached the limit of ${limit} searches per day for unauthenticated users. Sign in for more searches or wait until ${resetDate.toLocaleString()}.`
-      ).toResponse();
-    }
-  }
+  //   if (!success) {
+  //     const resetDate = new Date(reset);
+  //     return new ChatSDKError(
+  //       'rate_limit:api',
+  //       `You've reached the limit of ${limit} searches per day for unauthenticated users. Sign in for more searches or wait until ${resetDate.toLocaleString()}.`
+  //     ).toResponse();
+  //   }
+  // }
 
   // Early exit checks (no DB operations needed)
   if (!lightweightUser) {
     if (requiresAuthentication(model)) {
       return new ChatSDKError('unauthorized:model', `${model} requires authentication`).toResponse();
     }
-    if (group === 'extreme') {
-      return new ChatSDKError('unauthorized:auth', 'Authentication required to use Extreme Search mode').toResponse();
-    }
+    // COMMENTED OUT - Authentication requirement for Extreme Search removed per requirements
+    // if (group === 'extreme') {
+    //   return new ChatSDKError('unauthorized:auth', 'Authentication required to use Extreme Search mode').toResponse();
+    // }
   } else {
     // Fast auth checks using lightweight user (no additional DB calls)
     if (requiresProSubscription(model) && !lightweightUser.isProUser) {
@@ -325,7 +326,7 @@ export async function POST(req: Request) {
       const streamStartTime = Date.now();
 
       const result = streamText({
-        model: scira.languageModel(model),
+        model: ritivel.languageModel(model),
         messages: convertToModelMessages(messages),
         ...getModelParameters(model),
         stopWhen: stepCountIs(5),
@@ -347,33 +348,33 @@ export async function POST(req: Request) {
             only: ['zai', 'deepseek', 'alibaba', 'baseten'],
           },
           openai: {
-            ...(model !== 'scira-qwen-coder'
+            ...(model !== 'ritivel-qwen-coder'
               ? {
                 parallelToolCalls: false,
               }
               : {}),
-            ...((model === 'scira-gpt5' ||
-              model === 'scira-gpt5-mini' ||
-              model === 'scira-o3' ||
-              model === 'scira-gpt5-nano' ||
-              model === 'scira-gpt5-codex' ||
-              model === 'scira-gpt5-medium' ||
-              model === 'scira-o4-mini' ||
-              model === 'scira-gpt-4.1' ||
-              model === 'scira-gpt-4.1-mini' ||
-              model === 'scira-gpt-4.1-nano'
+            ...((model === 'ritivel-gpt5' ||
+              model === 'ritivel-gpt5-mini' ||
+              model === 'ritivel-o3' ||
+              model === 'ritivel-gpt5-nano' ||
+              model === 'ritivel-gpt5-codex' ||
+              model === 'ritivel-gpt5-medium' ||
+              model === 'ritivel-o4-mini' ||
+              model === 'ritivel-gpt-4.1' ||
+              model === 'ritivel-gpt-4.1-mini' ||
+              model === 'ritivel-gpt-4.1-nano'
               ? {
                 reasoningEffort: (
-                  model === 'scira-gpt5-nano' ||
-                    model === 'scira-gpt5' ||
-                    model === 'scira-gpt5-mini' ?
+                  model === 'ritivel-gpt5-nano' ||
+                    model === 'ritivel-gpt5' ||
+                    model === 'ritivel-gpt5-mini' ?
                     'minimal' :
                     'medium'
                 ),
-                promptCacheKey: 'scira-oai',
+                promptCacheKey: 'ritivel-oai',
                 parallelToolCalls: false,
                 reasoningSummary: 'detailed',
-                textVerbosity: (model === 'scira-o3' || model === 'scira-gpt5-codex' || model === 'scira-o4-mini' || model === 'scira-gpt-4.1' || model === 'scira-gpt-4.1-mini' || model === 'scira-gpt-4.1-nano' ? 'medium' : 'high'),
+                textVerbosity: (model === 'ritivel-o3' || model === 'ritivel-gpt5-codex' || model === 'ritivel-o4-mini' || model === 'ritivel-gpt-4.1' || model === 'ritivel-gpt-4.1-mini' || model === 'ritivel-gpt-4.1-nano' ? 'medium' : 'high'),
               }
               : {}) satisfies OpenAIResponsesProviderOptions),
           },
@@ -381,13 +382,13 @@ export async function POST(req: Request) {
             parallelToolCalls: false,
           },
           groq: {
-            ...(model === 'scira-gpt-oss-20' || model === 'scira-gpt-oss-120'
+            ...(model === 'ritivel-gpt-oss-20' || model === 'ritivel-gpt-oss-120'
               ? {
                 reasoningEffort: 'high',
                 reasoningFormat: 'hidden',
               }
               : {}),
-            ...(model === 'scira-qwen-32b'
+            ...(model === 'ritivel-qwen-32b'
               ? {
                 reasoningEffort: 'none',
               }
@@ -400,7 +401,7 @@ export async function POST(req: Request) {
             parallel_tool_calls: false,
           },
           cohere: {
-            ...(model === 'scira-cmd-a-think'
+            ...(model === 'ritivel-cmd-a-think'
               ? {
                 thinking: {
                   type: 'enabled',
@@ -410,7 +411,7 @@ export async function POST(req: Request) {
               : {}),
           } satisfies CohereChatModelOptions,
           anthropic: {
-            ...(model === 'scira-anthropic-think'
+            ...(model === 'ritivel-anthropic-think'
               ? {
                 sendReasoning: true,
                 thinking: {
@@ -422,7 +423,7 @@ export async function POST(req: Request) {
             disableParallelToolUse: true,
           } satisfies AnthropicProviderOptions,
           google: {
-            ...(model === 'scira-google-think' || model === 'scira-google-pro-think'
+            ...(model === 'ritivel-google-think' || model === 'ritivel-google-pro-think'
               ? {
                 thinkingConfig: {
                   thinkingBudget: 400,
@@ -544,7 +545,7 @@ export async function POST(req: Request) {
           }
 
           const { object: repairedArgs } = await generateObject({
-            model: scira.languageModel('scira-grok-4-fast'),
+            model: ritivel.languageModel('ritivel-default'),
             schema: tool.inputSchema,
             prompt: [
               `The model tried to call the tool "${toolCall.toolName}"` + ` with the following arguments:`,

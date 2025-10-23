@@ -57,7 +57,7 @@ import { listUserConnectorsAction } from '@/app/actions';
 // Pro Badge Component
 const ProBadge = ({ className = '' }: { className?: string }) => (
   <span
-    className={`font-baumans inline-flex items-center gap-1 rounded-lg shadow-sm !border-none !outline-0 ring-offset-1 !ring-offset-background/50 bg-gradient-to-br from-secondary/25 via-primary/20 to-accent/25 text-foreground px-2.5 pt-0.5 !pb-2 sm:pt-1 leading-3 dark:bg-gradient-to-br dark:from-primary dark:via-secondary dark:to-primary dark:text-foreground ${className}`}
+    className={`font-baumans inline-flex items-center gap-1 rounded-lg shadow-sm !border-none !outline-0 ring-offset-1 !ring-offset-background/50 bg-gradient-to-br from-blue-500/25 via-blue-600/20 to-blue-700/25 text-foreground px-2.5 pt-0.5 !pb-2 sm:pt-1 leading-3 dark:bg-gradient-to-br dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 dark:text-foreground ${className}`}
   >
     <span>pro</span>
   </span>
@@ -76,6 +76,7 @@ interface ModelSwitcherProps {
   selectedGroup: SearchGroupId;
 }
 
+/* COMMENTED OUT - Model selector UI removed per requirements
 const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
   ({
     selectedModel,
@@ -121,7 +122,7 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
     const [searchQuery, setSearchQuery] = useState('');
 
     // Global model order (Pro users): top-level hook to satisfy Rules of Hooks
-    const [globalModelOrder] = useLocalStorage<string[]>('scira-model-order-global', [] as string[]);
+    const [globalModelOrder] = useLocalStorage<string[]>('ritivel-model-order-global', [] as string[]);
 
     const normalizeText = useCallback((input: string): string => {
       return input
@@ -433,10 +434,10 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
 
     // Persisted ordering: category order and per-category model order
     const [modelCategoryOrder] = useLocalStorage<string[]>(
-      'scira-model-category-order',
+      'ritivel-model-category-order',
       isProUser ? ['Pro', 'Experimental', 'Free'] : ['Free', 'Experimental', 'Pro'],
     );
-    const [modelOrderMap] = useLocalStorage<Record<string, string[]>>('scira-model-order', {});
+    const [modelOrderMap] = useLocalStorage<Record<string, string[]>>('ritivel-model-order', {});
 
     const orderedGroupEntries = useMemo(() => {
       const baseOrder = modelCategoryOrder && modelCategoryOrder.length > 0
@@ -496,18 +497,18 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
       const isCurrentModelRestricted = isModelRestrictedInRegion(selectedModel, countryCode || undefined);
 
       // If current model is restricted in user's region, switch to default
-      if (isCurrentModelRestricted && selectedModel !== 'scira-default') {
-        console.log(`Auto-switching from restricted model '${selectedModel}' to 'scira-default' - model not available in region ${countryCode}`);
-        setSelectedModel('scira-default');
+      if (isCurrentModelRestricted && selectedModel !== 'ritivel-gpt-4.1-mini') {
+        console.log(`Auto-switching from restricted model '${selectedModel}' to 'ritivel-gpt-4.1-mini' - model not available in region ${countryCode}`);
+        setSelectedModel('ritivel-gpt-4.1-mini');
         toast.info('Switched to default model - Selected model not available in your region');
         return;
       }
 
       // If current model requires pro but user is not pro, switch to default
       // Also prevent infinite loops by ensuring we're not already on the default model
-      if (currentModelExists && currentModelRequiresPro && !isProUser && selectedModel !== 'scira-default') {
-        console.log(`Auto-switching from pro model '${selectedModel}' to 'scira-default' - user lost pro access`);
-        setSelectedModel('scira-default');
+      if (currentModelExists && currentModelRequiresPro && !isProUser && selectedModel !== 'ritivel-gpt-4.1-mini') {
+        console.log(`Auto-switching from pro model '${selectedModel}' to 'ritivel-gpt-4.1-mini' - user lost pro access`);
+        setSelectedModel('ritivel-gpt-4.1-mini');
 
         // Show a toast notification to inform the user
         toast.info('Switched to default model - Pro subscription required for premium models');
@@ -1097,7 +1098,7 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
                         </>
                       ) : (
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-xl sm:text-2xl font-be-vietnam-pro">Scira</span>
+                          <span className="text-xl sm:text-2xl font-be-vietnam-pro">Ritivel</span>
                           <ProBadge className="!text-white !bg-white/20 !ring-white/30 font-extralight" />
                         </div>
                       )}
@@ -1188,7 +1189,7 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
               <div className="flex items-center gap-4">
                 <CheckIcon className="size-4 text-primary flex-shrink-0" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">Scira Lookout</p>
+                  <p className="text-sm font-medium text-foreground">Ritivel Lookout</p>
                   <p className="text-xs text-muted-foreground">Automated search monitoring on your schedule</p>
                 </div>
               </div>
@@ -1307,6 +1308,7 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
 );
 
 ModelSwitcher.displayName = 'ModelSwitcher';
+*/
 
 interface Attachment {
   name: string;
@@ -1725,7 +1727,7 @@ const GroupModeToggle: React.FC<GroupSelectorProps> = React.memo(
     const isExtreme = selectedGroup === 'extreme';
 
     // Get search provider from localStorage with reactive updates
-const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider', 'cdsco');
+const [searchProvider] = useLocalStorage<SearchProvider>('ritivel-search-provider', 'cdsco');
 
     // Get dynamic search groups based on the selected search provider
     const dynamicSearchGroups = useMemo(() => getSearchGroups(searchProvider), [searchProvider]);
@@ -1735,9 +1737,10 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
       () =>
         dynamicSearchGroups.filter((group) => {
           if (!group.show) return false;
-          if ('requireAuth' in group && group.requireAuth && !session) return false;
+          // COMMENTED OUT - Authentication requirement removed per requirements
+          // if ('requireAuth' in group && group.requireAuth && !session) return false;
           // Don't filter out Pro-only groups, show them with Pro indicator
-          if (group.id === 'extreme') return false; // Exclude extreme from dropdown
+          if ((group.id as string) === 'extreme') return false; // Exclude extreme from dropdown - this is intentional
           return true;
         }),
       [dynamicSearchGroups, session],
@@ -1745,13 +1748,13 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
 
     // Persisted order for groups - must match settings-dialog.tsx
     const [groupOrder] = useLocalStorage<SearchGroupId[]>(
-      'scira-group-order',
+      'ritivel-group-order',
       dynamicSearchGroups.map((g) => g.id),
     );
 
     // Merge group order with current groups (same logic as settings-dialog.tsx)
     const mergedGroupOrder = useMemo(() => {
-      const currentIds = dynamicSearchGroups.map((g) => g.id);
+      const currentIds = dynamicSearchGroups.map((g) => g.id) as SearchGroupId[];
       const filteredExisting = (groupOrder || []).filter((id) => currentIds.includes(id));
       const missing = currentIds.filter((id) => !filteredExisting.includes(id));
       return [...filteredExisting, ...missing] as SearchGroupId[];
@@ -1760,10 +1763,12 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
     const orderedVisibleGroups = useMemo(() => {
       const order = mergedGroupOrder;
       const byId = new Map(visibleGroups.map((g) => [g.id, g] as const));
+      const visibleIds = new Set(visibleGroups.map((g) => g.id));
       const ordered = order
-        .map((id) => byId.get(id))
+        .filter((id) => visibleIds.has(id as any))
+        .map((id) => byId.get(id as any))
         .filter((g): g is NonNullable<typeof g> => Boolean(g));
-      const remaining = visibleGroups.filter((g) => !order.includes(g.id));
+      const remaining = visibleGroups.filter((g) => !order.includes(g.id as any));
       return [...ordered, ...remaining];
     }, [visibleGroups, mergedGroupOrder]);
 
@@ -1780,12 +1785,13 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
           onGroupSelect(webGroup);
         }
       } else {
+        // COMMENTED OUT - Authentication requirement removed per requirements
         // Check if user is authenticated before allowing extreme mode
-        if (!session) {
-          // Redirect to sign in page
-          window.location.href = '/sign-in';
-          return;
-        }
+        // if (!session) {
+        //   // Redirect to sign in page
+        //   window.location.href = '/sign-in';
+        //   return;
+        // }
 
         // Switch to extreme mode
         const extremeGroup = dynamicSearchGroups.find((group) => group.id === 'extreme');
@@ -2149,9 +2155,7 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
                   'flex items-center gap-1.5 px-3 h-6 rounded-md transition-all',
                   isExtreme
                     ? 'bg-accent text-foreground hover:bg-accent/80'
-                    : !session
-                      ? 'text-muted-foreground/50 cursor-pointer'
-                      : 'text-muted-foreground hover:bg-accent',
+                    : 'text-muted-foreground hover:bg-accent',
                 )}
               >
                 <HugeiconsIcon icon={AtomicPowerIcon} size={30} color="currentColor" strokeWidth={2} />
@@ -2171,15 +2175,14 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
                   <p className="font-semibold text-xs">
                     {isExtreme
                       ? 'Extreme Search Active'
-                      : session
-                        ? 'Extreme Search'
-                        : 'Sign in Required'
+                      : 'Extreme Search'
                     }
                   </p>
                 </div>
                 <p className="text-[11px] leading-snug text-secondary">
                   Deep research with multiple sources and in-depth analysis with 3x sources
                 </p>
+                {/* COMMENTED OUT - Pro upgrade message removed since Extreme Search is now available to all users
                 {!isProUser && (
                   <div className="pt-1 border-t border-border/50">
                     <a
@@ -2194,6 +2197,7 @@ const [searchProvider] = useLocalStorage<SearchProvider>('scira-search-provider'
                     </a>
                   </div>
                 )}
+                */}
               </div>
             </TooltipContent>
           </Tooltip>
@@ -2707,8 +2711,8 @@ const FormComponent: React.FC<FormComponentProps> = ({
           });
           
           if (extremeModels.length > 0) {
-            // Prioritize: scira-default if available, otherwise first free model, then first available
-            const defaultModel = extremeModels.find((m) => m.value === 'scira-default');
+            // Prioritize: ritivel-gpt-4.1-mini if available, otherwise first free model, then first available
+            const defaultModel = extremeModels.find((m) => m.value === 'ritivel-gpt-4.1-mini');
             const firstFreeModel = extremeModels.find((m) => !m.pro);
             const fallbackModel = extremeModels[0];
             
@@ -3701,6 +3705,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                     />
                   )}
 
+                  {/* COMMENTED OUT - Model selector UI removed per requirements
                   <ModelSwitcher
                     selectedModel={selectedModel}
                     setSelectedModel={setSelectedModel}
@@ -3719,6 +3724,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                     user={user}
                     selectedGroup={selectedGroup}
                   />
+                  */}
                 </div>
 
                 <div className={cn('flex items-center flex-shrink-0 gap-1')}>
@@ -4016,7 +4022,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
               <div className="flex items-center gap-4">
                 <CheckIcon className="size-4 text-primary flex-shrink-0" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">Scira Lookout</p>
+                  <p className="text-sm font-medium text-foreground">Ritivel Lookout</p>
                   <p className="text-xs text-muted-foreground">Automated search monitoring on your schedule</p>
                 </div>
               </div>

@@ -1,0 +1,9 @@
+llama-index
+llama-index-core
+llama-index-embeddings-openai
+llama-index-llms-openai
+llama-index-vector-stores-pinecone
+fastapi
+uvicorn
+pinecone
+python-dotenv

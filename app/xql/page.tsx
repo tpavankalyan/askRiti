@@ -18,7 +18,7 @@ import { TextShimmer } from '@/components/core/text-shimmer';
 import { cn } from '@/lib/utils';
 import { type XQLMessage } from '@/app/api/xql/route';
 import { highlight } from 'sugar-high';
-import { SciraLogo } from '@/components/logos/scira-logo';
+import { RitivelLogo } from '@/components/logos/ritivel-logo';
 
 export default function XQLPage() {
   const [input, setInput] = useState<string>('');
@@ -355,7 +355,7 @@ export default function XQLPage() {
             {/* Show loading state */}
             {(status === 'streaming' || status === 'submitted') && (
               <Card className="relative w-full h-[80px] sm:h-[100px] my-4 overflow-hidden shadow-none p-0">
-                <BorderTrail className={cn('bg-gradient-to-r from-primary/20 via-primary to-primary/20')} size={80} />
+                <BorderTrail className={cn('bg-gradient-to-r from-blue-500/20 via-blue-600 to-blue-500/20')} size={80} />
                 <CardContent className="px-4 py-4 sm:px-6 sm:py-6">
                   <div className="relative flex items-center gap-2 sm:gap-3">
                     <div
@@ -364,7 +364,7 @@ export default function XQLPage() {
                       )}
                     >
                       <BorderTrail
-                        className={cn('bg-gradient-to-r from-primary/20 via-primary to-primary/20')}
+                        className={cn('bg-gradient-to-r from-blue-500/20 via-blue-600 to-blue-500/20')}
                         size={40}
                       />
                       {lastMessage &&
@@ -417,7 +417,7 @@ export default function XQLPage() {
                       <CardContent className="p-0">
                         <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4">
                           <div className="flex items-center gap-2 min-w-0">
-                            <SciraLogo className="size-6 text-foreground flex-shrink-0" />
+                            <RitivelLogo className="size-6 text-foreground flex-shrink-0" />
                             <span className="font-semibold text-foreground text-sm sm:text-base">
                               Scira found {citations.length} Posts
                             </span>

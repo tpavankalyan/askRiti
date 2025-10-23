@@ -62,11 +62,11 @@ const ChatInterface = memo(
     const [q] = useQueryState('q', parseAsString.withDefault(''));
     const [input, setInput] = useState<string>('');
 
-    const [selectedModel, setSelectedModel] = useLocalStorage('scira-selected-model', 'scira-default');
-    const [selectedGroup, setSelectedGroup] = useLocalStorage<SearchGroupId>('scira-selected-group', 'web');
+    const [selectedModel, setSelectedModel] = useLocalStorage('ritivel-selected-model', 'ritivel-gpt-4.1-mini');
+    const [selectedGroup, setSelectedGroup] = useLocalStorage<SearchGroupId>('ritivel-selected-group', 'web');
     const [selectedConnectors, setSelectedConnectors] = useState<ConnectorProvider[]>([]);
     const [isCustomInstructionsEnabled, setIsCustomInstructionsEnabled] = useLocalStorage(
-      'scira-custom-instructions-enabled',
+      'ritivel-custom-instructions-enabled',
       true,
     );
 
@@ -84,20 +84,20 @@ const ChatInterface = memo(
 
     // Get persisted values for dialog states
     const [persistedHasShownUpgradeDialog, setPersitedHasShownUpgradeDialog] = useLocalStorage(
-      'scira-upgrade-prompt-shown',
+      'ritivel-upgrade-prompt-shown',
       false,
     );
     const [persistedHasShownSignInPrompt, setPersitedHasShownSignInPrompt] = useLocalStorage(
-      'scira-signin-prompt-shown',
+      'ritivel-signin-prompt-shown',
       false,
     );
     const [persistedHasShownLookoutAnnouncement, setPersitedHasShownLookoutAnnouncement] = useLocalStorage(
-      'scira-lookout-announcement-shown',
+      'ritivel-lookout-announcement-shown',
       false,
     );
 
 const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco'>(
-      'scira-search-provider',
+      'ritivel-search-provider',
       'cdsco',
     );
 
@@ -177,9 +177,9 @@ const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'fir
 
       // If current model requires pro but user is not pro, switch to default
       // Also prevent infinite loops by ensuring we're not already on the default model
-      if (currentModelRequiresPro && !isUserPro && selectedModel !== 'scira-default') {
-        console.log(`Auto-switching from pro model '${selectedModel}' to 'scira-default' - user lost pro access`);
-        setSelectedModel('scira-default');
+      if (currentModelRequiresPro && !isUserPro && selectedModel !== 'ritivel-gpt-4.1-mini') {
+        console.log(`Auto-switching from pro model '${selectedModel}' to 'ritivel-gpt-4.1-mini' - user lost pro access`);
+        setSelectedModel('ritivel-gpt-4.1-mini');
 
         // Show a toast notification to inform the user
         toast.info('Switched to default model - Pro subscription required for premium models');
@@ -643,11 +643,11 @@ const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'fir
             {status === 'ready' && messages.length === 0 && (
               <div className="text-center m-0 mb-2">
                 <div className="inline-flex items-center gap-3">
-                  <h1 className="text-4xl sm:text-5xl !mb-0 text-foreground dark:text-foreground font-be-vietnam-pro! font-light tracking-tighter">
-                    scira
+                  <h1 className="text-4xl sm:text-5xl !mb-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 bg-clip-text text-transparent font-be-vietnam-pro! font-light tracking-tighter">
+                    ritivel
                   </h1>
                   {isUserPro && (
-                    <h1 className="text-2xl font-baumans! leading-4 inline-block !px-3 !pt-1 !pb-2.5 rounded-xl shadow-sm !m-0 !mt-2 bg-gradient-to-br from-secondary/25 via-primary/20 to-accent/25 text-foreground ring-1 ring-ring/35 ring-offset-1 ring-offset-background dark:bg-gradient-to-br dark:from-primary dark:via-secondary dark:to-primary dark:text-foreground">
+                    <h1 className="text-2xl font-baumans! leading-4 inline-block !px-3 !pt-1 !pb-2.5 rounded-xl shadow-sm !m-0 !mt-2 bg-gradient-to-br from-blue-500/25 via-blue-600/20 to-blue-700/25 text-foreground ring-1 ring-ring/35 ring-offset-1 ring-offset-background dark:bg-gradient-to-br dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 dark:text-foreground">
                       pro
                     </h1>
                   )}

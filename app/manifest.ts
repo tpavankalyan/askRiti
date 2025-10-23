@@ -2,10 +2,10 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Scira - AI-powered Search Engine',
-    short_name: 'Scira',
+    name: 'Ritivel - Accelerate regulatory intelligence',
+    short_name: 'Ritivel',
     description:
-      'A minimalistic AI-powered search engine that helps you find information on the internet using advanced AI models like GPT-4, Claude, and Grok',
+      'Ritivel is a free AI search engine that finds, analyzes, and cites the live web. Accelerate regulatory intelligence with AI-powered search.',
     start_url: '/',
     display: 'standalone',
     categories: ['search', 'ai', 'productivity'],

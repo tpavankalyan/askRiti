@@ -22,17 +22,17 @@ export function cn(...inputs: ClassValue[]) {
 
 export type SearchGroupId =
   | 'web'
-  | 'x'
   | 'academic'
+  | 'extreme'
+  | 'connectors'
+  | 'x'
   | 'youtube'
   | 'reddit'
   | 'stocks'
   | 'chat'
-  | 'extreme'
   | 'memory'
   | 'crypto'
-  | 'code'
-  | 'connectors';
+  | 'code';
 
 // Search provider information for dynamic descriptions
 export const searchProviderInfo = {
@@ -61,43 +61,44 @@ export function getSearchGroups(searchProvider: SearchProvider = 'cdsco') {
       icon: GlobalSearchIcon,
       show: true,
     },
-    {
-      id: 'chat' as const,
-      name: 'Chat',
-      description: 'Talk to the model directly.',
-      icon: ChattingIcon,
-      show: true,
-    },
-    {
-      id: 'x' as const,
-      name: 'X',
-      description: 'Search X posts',
-      icon: NewTwitterIcon,
-      show: true,
-    },
-    {
-      id: 'stocks' as const,
-      name: 'Stocks',
-      description: 'Stock and currency information',
-      icon: AppleStocksIcon,
-      show: true,
-    },
-    {
-      id: 'connectors' as const,
-      name: 'Connectors',
-      description: 'Search Google Drive, Notion and OneDrive documents',
-      icon: ConnectIcon,
-      show: true,
-      requireAuth: true,
-      requirePro: true,
-    },
-    {
-      id: 'code' as const,
-      name: 'Code',
-      description: 'Get context about languages and frameworks',
-      icon: CodeCircleIcon,
-      show: true,
-    },
+    // COMMENTED OUT - Search modes restricted to Web and Academic only per requirements
+    // {
+    //   id: 'chat' as const,
+    //   name: 'Chat',
+    //   description: 'Talk to the model directly.',
+    //   icon: ChattingIcon,
+    //   show: true,
+    // },
+    // {
+    //   id: 'x' as const,
+    //   name: 'X',
+    //   description: 'Search X posts',
+    //   icon: NewTwitterIcon,
+    //   show: true,
+    // },
+    // {
+    //   id: 'stocks' as const,
+    //   name: 'Stocks',
+    //   description: 'Stock and currency information',
+    //   icon: AppleStocksIcon,
+    //   show: true,
+    // },
+    // {
+    //   id: 'connectors' as const,
+    //   name: 'Connectors',
+    //   description: 'Search Google Drive, Notion and OneDrive documents',
+    //   icon: ConnectIcon,
+    //   show: true,
+    //   requireAuth: true,
+    //   requirePro: true,
+    // },
+    // {
+    //   id: 'code' as const,
+    //   name: 'Code',
+    //   description: 'Get context about languages and frameworks',
+    //   icon: CodeCircleIcon,
+    //   show: true,
+    // },
     {
       id: 'academic' as const,
       name: 'Academic',
@@ -110,38 +111,55 @@ export function getSearchGroups(searchProvider: SearchProvider = 'cdsco') {
       name: 'Extreme',
       description: 'Deep research with multiple sources and analysis',
       icon: AtomicPowerIcon,
-      show: true,
+      show: false, // Hidden from main UI but available for toggle
+    },
+    {
+      id: 'connectors' as const,
+      name: 'Connectors',
+      description: 'Search Google Drive, Notion and OneDrive documents',
+      icon: ConnectIcon,
+      show: false, // Hidden from main UI but available for code
       requireAuth: true,
+      requirePro: true,
     },
-    {
-      id: 'memory' as const,
-      name: 'Memory',
-      description: 'Your personal memory companion',
-      icon: Database02Icon,
-      show: true,
-      requireAuth: true,
-    },
-    {
-      id: 'reddit' as const,
-      name: 'Reddit',
-      description: 'Search Reddit posts',
-      icon: RedditIcon,
-      show: true,
-    },
-    {
-      id: 'crypto' as const,
-      name: 'Crypto',
-      description: 'Cryptocurrency research powered by CoinGecko',
-      icon: Bitcoin02Icon,
-      show: true,
-    },
-    {
-      id: 'youtube' as const,
-      name: 'YouTube',
-      description: 'Search YouTube videos powered by Exa',
-      icon: YoutubeIcon,
-      show: true,
-    },
+    // COMMENTED OUT - Search modes restricted to Web and Academic only per requirements
+    // {
+    //   id: 'extreme' as const,
+    //   name: 'Extreme',
+    //   description: 'Deep research with multiple sources and analysis',
+    //   icon: AtomicPowerIcon,
+    //   show: true,
+    //   requireAuth: true,
+    // },
+    // {
+    //   id: 'memory' as const,
+    //   name: 'Memory',
+    //   description: 'Your personal memory companion',
+    //   icon: Database02Icon,
+    //   show: true,
+    //   requireAuth: true,
+    // },
+    // {
+    //   id: 'reddit' as const,
+    //   name: 'Reddit',
+    //   description: 'Search Reddit posts',
+    //   icon: RedditIcon,
+    //   show: true,
+    // },
+    // {
+    //   id: 'crypto' as const,
+    //   name: 'Crypto',
+    //   description: 'Cryptocurrency research powered by CoinGecko',
+    //   icon: Bitcoin02Icon,
+    //   show: true,
+    // },
+    // {
+    //   id: 'youtube' as const,
+    //   name: 'YouTube',
+    //   description: 'Search YouTube videos powered by Exa',
+    //   icon: YoutubeIcon,
+    //   show: true,
+    // },
   ] as const;
 }
 

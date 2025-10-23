@@ -19,6 +19,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from '@/lib/db';
 import { config } from 'dotenv';
 import { serverEnv } from '@/env/server';
+import { clientEnv } from '@/env/client';
 import { checkout, polar, portal, usage, webhooks } from '@polar-sh/better-auth';
 import { Polar } from '@polar-sh/sdk';
 import {
@@ -44,12 +45,12 @@ function safeParseDate(value: string | Date | null | undefined): Date | null {
 }
 
 const polarClient = new Polar({
-  accessToken: process.env.POLAR_ACCESS_TOKEN,
+  accessToken: serverEnv.POLAR_ACCESS_TOKEN || 'dev-polar-token',
   ...(process.env.NODE_ENV === 'production' ? {} : { server: 'sandbox' }),
 });
 
 export const dodoPayments = new DodoPayments({
-  bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
+  bearerToken: serverEnv.DODO_PAYMENTS_API_KEY || 'dev-dodo-payments-key',
   ...(process.env.NODE_ENV === 'production' ? { environment: 'live_mode' } : { environment: 'test_mode' }),
 });
 
@@ -94,8 +95,8 @@ export const auth = betterAuth({
       clientSecret: serverEnv.TWITTER_CLIENT_SECRET,
     },
     microsoft: {
-      clientId: process.env.MICROSOFT_CLIENT_ID as string,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET as string,
+      clientId: serverEnv.MICROSOFT_CLIENT_ID,
+      clientSecret: serverEnv.MICROSOFT_CLIENT_SECRET,
       prompt: 'select_account', // Forces account selection
     },
   },
@@ -110,16 +111,8 @@ export const auth = betterAuth({
         dodocheckout({
           products: [
             {
-              productId:
-                process.env.NEXT_PUBLIC_PREMIUM_TIER ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_PREMIUM_TIER environment variable is required');
-                })(),
-              slug:
-                process.env.NEXT_PUBLIC_PREMIUM_SLUG ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_PREMIUM_SLUG environment variable is required');
-                })(),
+              productId: clientEnv.NEXT_PUBLIC_PREMIUM_TIER,
+              slug: clientEnv.NEXT_PUBLIC_PREMIUM_SLUG,
             },
           ],
           successUrl: '/success',
@@ -127,7 +120,7 @@ export const auth = betterAuth({
         }),
         dodoportal(),
         dodowebhooks({
-          webhookKey: process.env.DODO_PAYMENTS_WEBHOOK_SECRET!,
+          webhookKey: serverEnv.DODO_PAYMENTS_WEBHOOK_SECRET,
           onPayload: async (payload) => {
             const webhookPayload = payload as any;
             console.log('🔔 Received Dodo Payments webhook:', webhookPayload.type);
@@ -285,16 +278,8 @@ export const auth = betterAuth({
         checkout({
           products: [
             {
-              productId:
-                process.env.NEXT_PUBLIC_STARTER_TIER ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_STARTER_TIER environment variable is required');
-                })(),
-              slug:
-                process.env.NEXT_PUBLIC_STARTER_SLUG ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_STARTER_SLUG environment variable is required');
-                })(),
+              productId: clientEnv.NEXT_PUBLIC_STARTER_TIER,
+              slug: clientEnv.NEXT_PUBLIC_STARTER_SLUG,
             },
           ],
           successUrl: `/success`,
@@ -303,11 +288,7 @@ export const auth = betterAuth({
         portal(),
         usage(),
         webhooks({
-          secret:
-            process.env.POLAR_WEBHOOK_SECRET ||
-            (() => {
-              throw new Error('POLAR_WEBHOOK_SECRET environment variable is required');
-            })(),
+          secret: serverEnv.POLAR_WEBHOOK_SECRET,
           onPayload: async ({ data, type }) => {
             if (
               type === 'subscription.created' ||
@@ -432,6 +413,6 @@ export const auth = betterAuth({
     }),
     nextCookies(),
   ],
-  trustedOrigins: ['http://localhost:3000', 'https://scira.ai', 'https://www.scira.ai'],
-  allowedOrigins: ['http://localhost:3000', 'https://scira.ai', 'https://www.scira.ai'],
+  trustedOrigins: ['http://localhost:3000', 'https://ritivel.ai', 'https://www.ritivel.ai'],
+  allowedOrigins: ['http://localhost:3000', 'https://ritivel.ai', 'https://www.ritivel.ai'],
 });

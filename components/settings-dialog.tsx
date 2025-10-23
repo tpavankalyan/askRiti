@@ -61,7 +61,7 @@ import { models } from '@/ai/providers';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { useIsProUser } from '@/contexts/user-context';
-import { SciraLogo } from './logos/scira-logo';
+import { RitivelLogo } from './logos/ritivel-logo';
 import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -133,8 +133,8 @@ export function ProfileSection({ user, subscriptionData, isProUser, isProStatusL
               <span
                 className={cn(
                   'font-baumans! px-2 pt-1 pb-2 inline-flex leading-5 mt-2 items-center rounded-lg shadow-sm border-transparent ring-1 ring-ring/35 ring-offset-1 ring-offset-background',
-                  'bg-gradient-to-br from-secondary/25 via-primary/20 to-accent/25 text-foreground',
-                  'dark:bg-gradient-to-br dark:from-primary dark:via-secondary dark:to-primary dark:text-foreground',
+                  'bg-gradient-to-br from-blue-500/25 via-blue-600/20 to-blue-700/25 text-foreground',
+                  'dark:bg-gradient-to-br dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 dark:text-foreground',
                 )}
               >
                 pro user
@@ -199,6 +199,7 @@ const CdscoIcon = ({ className }: { className?: string }) => (
   />
 );
 
+// COMMENTED OUT - Search provider options restricted to CDSCO only per requirements
 // Search Provider Options
 const searchProviders = [
   {
@@ -208,85 +209,86 @@ const searchProviders = [
     icon: CdscoIcon,
     default: true,
   },
-  {
-    value: 'parallel',
-    label: 'Parallel AI',
-    description: 'Base and premium web search along with Firecrawl image search support',
-    icon: ParallelIcon,
-    default: false,
-  },
-  {
-    value: 'firecrawl',
-    label: 'Firecrawl',
-    description: 'Web, news, and image search with content scraping capabilities',
-    icon: FirecrawlIcon,
-    default: false,
-  },
-  {
-    value: 'exa',
-    label: 'Exa',
-    description: 'Enhanced and faster web search with images and advanced filtering',
-    icon: ExaIcon,
-    default: false,
-  },
-  {
-    value: 'tavily',
-    label: 'Tavily',
-    description: 'Wide web search with comprehensive results and analysis',
-    icon: TavilyIcon,
-    default: false,
-  },
+  // {
+  //   value: 'parallel',
+  //   label: 'Parallel AI',
+  //   description: 'Base and premium web search along with Firecrawl image search support',
+  //   icon: ParallelIcon,
+  //   default: false,
+  // },
+  // {
+  //   value: 'firecrawl',
+  //   label: 'Firecrawl',
+  //   description: 'Web, news, and image search with content scraping capabilities',
+  //   icon: FirecrawlIcon,
+  //   default: false,
+  // },
+  // {
+  //   value: 'exa',
+  //   label: 'Exa',
+  //   description: 'Enhanced and faster web search with images and advanced filtering',
+  //   icon: ExaIcon,
+  //   default: false,
+  // },
+  // {
+  //   value: 'tavily',
+  //   label: 'Tavily',
+  //   description: 'Wide web search with comprehensive results and analysis',
+  //   icon: TavilyIcon,
+  //   default: false,
+  // },
 ] as const;
 
+// COMMENTED OUT - Search provider selector UI removed per requirements
 // Search Provider Selector Component
-function SearchProviderSelector({
-  value,
-  onValueChange,
-  disabled,
-  className,
-}: {
-  value: string;
-  onValueChange: (value: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco') => void;
-  disabled?: boolean;
-  className?: string;
-}) {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+// function SearchProviderSelector({
+//   value,
+//   onValueChange,
+//   disabled,
+//   className,
+// }: {
+//   value: string;
+//   onValueChange: (value: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco') => void;
+//   disabled?: boolean;
+//   className?: string;
+// }) {
+//   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  return (
-    <div className={cn('w-full', className)}>
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
-        {searchProviders.map((provider) => (
-          <button
-            key={provider.value}
-            onClick={() => onValueChange(provider.value as any)}
-            disabled={disabled}
-            className={cn(
-              'flex flex-col items-start p-4 rounded-lg border transition-all duration-200',
-              'hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              value === provider.value
-                ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                : 'border-border bg-background hover:border-border/80',
-            )}
-          >
-            <div className="flex items-center gap-2.5 w-full mb-2">
-              <provider.icon className="text-muted-foreground size-4 flex-shrink-0" />
-              <div className="font-medium text-sm flex items-center gap-2">
-                {provider.label}
-                {provider.default && (
-                  <Badge variant="secondary" className="text-[9px] px-1 py-0.5 bg-primary/10 text-primary border-0">
-                    Default
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground leading-relaxed text-left">{provider.description}</div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className={cn('w-full', className)}>
+//       <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
+//         {searchProviders.map((provider) => (
+//           <button
+//             key={provider.value}
+//             onClick={() => onValueChange(provider.value as any)}
+//             disabled={disabled}
+//             className={cn(
+//               'flex flex-col items-start p-4 rounded-lg border transition-all duration-200',
+//               'hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+//               'disabled:opacity-50 disabled:cursor-not-allowed',
+//               value === provider.value
+//                 ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+//                 : 'border-border bg-background hover:border-border/80',
+//             )}
+//           >
+//             <div className="flex items-center gap-2.5 w-full mb-2">
+//               <provider.icon className="text-muted-foreground size-4 flex-shrink-0" />
+//               <div className="font-medium text-sm flex items-center gap-2">
+//                 {provider.label}
+//                 {provider.default && (
+//                   <Badge variant="secondary" className="text-[9px] px-1 py-0.5 bg-primary/10 text-primary border-0">
+//                     Default
+//                   </Badge>
+//                 )}
+//               </div>
+//             </div>
+//             <div className="text-xs text-muted-foreground leading-relaxed text-left">{provider.description}</div>
+//           </button>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
 
 // Component for Combined Preferences (Search + Custom Instructions)
 export function PreferencesSection({
@@ -314,9 +316,9 @@ const [searchProvider, setSearchProvider] = useLocalStorage<'exa' | 'parallel' |
     dynamicGroups.map((g) => g.id),
   );
   const mergedGroupOrder = useMemo(() => {
-    const currentIds = dynamicGroups.map((g) => g.id);
-    const filteredExisting = groupOrder.filter((id) => currentIds.includes(id));
-    const missing = currentIds.filter((id) => !filteredExisting.includes(id));
+    const currentIds = dynamicGroups.map((g) => g.id) as SearchGroupId[];
+    const filteredExisting = groupOrder.filter((id) => currentIds.includes(id as any));
+    const missing = currentIds.filter((id) => !filteredExisting.includes(id as any));
     return [...filteredExisting, ...missing] as SearchGroupId[];
   }, [dynamicGroups, groupOrder]);
 
@@ -534,6 +536,7 @@ const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' |
                 </div>
               </div>
 
+              {/* COMMENTED OUT - Search provider selector UI removed per requirements
               <div className="space-y-2.5">
                 <SearchProviderSelector value={searchProvider} onValueChange={handleSearchProviderChange} />
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -541,6 +544,7 @@ const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' |
                   used for all future searches.
                 </p>
               </div>
+              */}
             </div>
           </div>
         </TabsContent>
@@ -569,11 +573,11 @@ const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' |
                         <HugeiconsIcon icon={group.icon} size={16} color="currentColor" strokeWidth={2} />
                         <span className="text-sm font-medium truncate">{group.name}</span>
                       </div>
-                      {'requirePro' in group && group.requirePro && (
+                      {('requirePro' in group && group.requirePro) ? (
                         <Badge variant="secondary" className="text-[10px]">
                           PRO
                         </Badge>
-                      )}
+                      ) : null}
                     </div>
                   );
                 }}
@@ -582,6 +586,7 @@ const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' |
             </div>
           </div>
 
+          {/* COMMENTED OUT - Model reordering UI removed per requirements
           {/* Reorder Models (Pro users only) - simplified single list */}
           {user?.isProUser && (
             <div className="space-y-3">
@@ -624,6 +629,7 @@ const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' |
               </div>
             </div>
           )}
+          */
         </TabsContent>
       </Tabs>
     </div>
@@ -2136,7 +2142,7 @@ export function SettingsDialog({
             {/* Header - more compact */}
             <DrawerHeader className="pb-2 px-4 pt-3 shrink-0">
               <DrawerTitle className="text-base font-medium flex items-center gap-2">
-                <SciraLogo className="size-6" />
+                <RitivelLogo className="size-6" />
                 Settings
               </DrawerTitle>
             </DrawerHeader>
@@ -2198,7 +2204,7 @@ export function SettingsDialog({
       <DialogContent className="!max-w-4xl !w-full max-h-[85vh] !p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-4 !m-0">
           <DialogTitle className="text-xl font-medium tracking-normal flex items-center gap-2">
-            <SciraLogo className="size-6" color="currentColor" />
+            <RitivelLogo className="size-6" color="currentColor" />
             Settings
           </DialogTitle>
         </DialogHeader>

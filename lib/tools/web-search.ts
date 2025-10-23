@@ -242,9 +242,9 @@ class ParallelSearchStrategy implements SearchStrategy {
   }
 }
 
-// CDSCO search strategy (similar to Parallel but without images)
+// CDSCO search strategy (using FastAPI server)
 class CDSCOSearchStrategy implements SearchStrategy {
-  constructor(private parallel: Parallel) { }
+  constructor(private apiUrl: string) { }
 
   async search(
     queries: string[],
@@ -256,7 +256,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
     },
   ) {
     const limitedQueries = queries.slice(0, 5);
-    console.log('Using CDSCO (Parallel-like) batch processing for queries:', limitedQueries);
+    console.log('Using CDSCO (FastAPI) batch processing for queries:', limitedQueries);
 
     // Start notifications
     limitedQueries.forEach((query, index) => {
@@ -275,26 +275,28 @@ class CDSCOSearchStrategy implements SearchStrategy {
 
     try {
       const perQueryPromises = limitedQueries.map(async (query, index) => {
-        const currentQuality = options.quality[index] || options.quality[0] || 'default';
-        const currentMaxResults = options.maxResults[index] || options.maxResults[0] || 10;
-
         try {
-          const singleResponse = await this.parallel.beta.search({
-            objective: query,
-            search_queries: [query],
-            processor: currentQuality === 'best' ? 'pro' : 'base',
-            max_results: Math.max(currentMaxResults, 10),
-            max_chars_per_result: 1000,
+          const response = await fetch(`${this.apiUrl}/regsearch`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query }),
           });
 
-          const results = (singleResponse?.results || []).map((result: any) => ({
-            url: result.url,
-            title: cleanTitle(result.title || ''),
-            content: Array.isArray(result.excerpts)
-              ? result.excerpts.join(' ').substring(0, 1000)
-              : (result.content || '').substring(0, 1000),
-            published_date: undefined,
-            author: undefined,
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const results = await response.json();
+
+          // Transform the results to match the expected format
+          const transformedResults = results.map((doc: any) => ({
+            url: doc.url,
+            title: cleanTitle(doc.title || ''),
+            content: doc.content || '',
+            published_date: doc.published_date || undefined,
+            author: doc.author || undefined,
           }));
 
           options.dataStream?.write({
@@ -304,14 +306,14 @@ class CDSCOSearchStrategy implements SearchStrategy {
               index,
               total: limitedQueries.length,
               status: 'completed',
-              resultsCount: results.length,
+              resultsCount: transformedResults.length,
               imagesCount: 0,
             },
           });
 
           return {
             query,
-            results: deduplicateByDomainAndUrl(results),
+            results: deduplicateByDomainAndUrl(transformedResults),
             images: [],
           };
         } catch (error) {
@@ -728,10 +730,11 @@ const createSearchStrategy = (
     parallel: Parallel;
     firecrawl: FirecrawlApp;
     tvly: TavilyClient;
+    fastapi?: string;
   },
 ): SearchStrategy => {
   const strategies: Record<string, () => SearchStrategy> = {
-    cdsco: () => new CDSCOSearchStrategy(clients.parallel),
+    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'http://localhost:8000'),
     parallel: () => new ParallelSearchStrategy(clients.parallel, clients.firecrawl),
     tavily: () => new TavilySearchStrategy(clients.tvly),
     firecrawl: () => new FirecrawlSearchStrategy(clients.firecrawl),
@@ -802,6 +805,7 @@ export function webSearchTool(
         parallel: new Parallel({ apiKey: serverEnv.PARALLEL_API_KEY }),
         firecrawl: new FirecrawlApp({ apiKey: serverEnv.FIRECRAWL_API_KEY }),
         tvly: tavily({ apiKey: serverEnv.TAVILY_API_KEY }),
+        fastapi: serverEnv.FASTAPI_URL || 'http://localhost:8000',
       };
 
       console.log('Queries:', queries);

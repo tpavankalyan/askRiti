@@ -8,7 +8,7 @@ import { generateObject, UIMessage, generateText } from 'ai';
 import type { ModelMessage } from 'ai';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth-utils';
-import { scira } from '@/ai/providers';
+import { ritivel } from '@/ai/providers';
 import {
   getChatsByUserId,
   deleteChatById,
@@ -93,7 +93,7 @@ export async function suggestQuestions(history: any[]) {
   console.log(history);
 
   const { object } = await generateObject({
-    model: scira.languageModel('scira-follow-up'),
+    model: ritivel.languageModel('ritivel-default'),
     system: `You are a search engine follow up query/questions generator. You MUST create EXACTLY 3 questions for the search engine based on the conversation history.
 
 ### Question Generation Guidelines:
@@ -163,7 +163,7 @@ export async function checkImageModeration(images: string[]) {
 
 export async function generateTitleFromUserMessage({ message }: { message: UIMessage }) {
   const { text: title } = await generateText({
-    model: scira.languageModel('scira-name'),
+    model: ritivel.languageModel('ritivel-name'),
     system: `You are an expert title generator. You are given a message and you need to generate a short title based on it.
 
     - you will generate a short title based on the first message a user begins a conversation with
@@ -215,7 +215,7 @@ Output requirements:
 - No quotes, no commentary, no markdown, and no preface.`;
 
     const { text } = await generateText({
-      model: scira.languageModel('scira-enhance'),
+      model: ritivel.languageModel('ritivel-enhance'),
       temperature: 0.6,
       topP: 0.95,
       maxOutputTokens: 1024,
@@ -278,9 +278,9 @@ const groupTools = {
 
 const groupInstructions = {
   web: `
-# Scira AI Search Engine
+# Ritivel AI Search Engine
 
-You are Scira, an AI search engine designed to help users find information on the internet with no unnecessary chatter and focus on content delivery in markdown format.
+You are Ritivel, an AI search engine designed to help users find information on the internet with no unnecessary chatter and focus on content delivery in markdown format.
 
 **Today's Date IMP for all tools:** ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' })}
 
@@ -728,7 +728,7 @@ code_example()
 
   code: `
   ⚠️ CRITICAL: YOU MUST RUN THE CODE_CONTEXT TOOL IMMEDIATELY ON RECEIVING ANY USER MESSAGE!
-  You are a Code Context Finder Assistant called Scira AI, specialized in finding programming documentation, examples, and best practices.
+  You are a Code Context Finder Assistant called Ritivel AI, specialized in finding programming documentation, examples, and best practices.
 
   Today's date is ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' })}.
 
@@ -1043,7 +1043,7 @@ code_example()
   - Do not include images in responses`,
 
   chat: `
-  You are Scira, a helpful assistant that helps with the task asked by the user.
+  You are Ritivel, a helpful assistant that helps with the task asked by the user.
   Today's date is ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' })}.
 
   ### Guidelines:
@@ -1069,7 +1069,7 @@ code_example()
   - Mathematical expressions must always be properly delimited`,
 
   extreme: `
-# Scira AI Extreme Research Mode
+# Ritivel AI Extreme Research Mode
 
   You are an advanced research assistant focused on deep analysis and comprehensive understanding with focus to be backed by citations in a 3 page long research paper format.
   You objective is to always run the tool first and then write the response with citations with 3 pages of content!
@@ -2067,7 +2067,7 @@ export async function createScheduledLookout({
               url:
                 process.env.NODE_ENV === 'development'
                   ? process.env.NGROK_URL + '/api/lookout'
-                  : `https://scira.ai/api/lookout`,
+                  : `https://ritivel.ai/api/lookout`,
               body: JSON.stringify({
                 lookoutId: lookout.id,
                 prompt,
@@ -2101,7 +2101,7 @@ export async function createScheduledLookout({
             destination:
               process.env.NODE_ENV === 'development'
                 ? process.env.NGROK_URL + '/api/lookout'
-                : `https://scira.ai/api/lookout`,
+                : `https://ritivel.ai/api/lookout`,
             method: 'POST',
             cron: cronSchedule,
             body: JSON.stringify({
@@ -2301,7 +2301,7 @@ export async function updateLookoutAction({
           destination:
             process.env.NODE_ENV === 'development'
               ? process.env.NGROK_URL + '/api/lookout'
-              : `https://scira.ai/api/lookout`,
+              : `https://ritivel.ai/api/lookout`,
           method: 'POST',
           cron: cronSchedule,
           body: JSON.stringify({
@@ -2403,7 +2403,7 @@ export async function testLookoutAction({ id }: { id: string }) {
 
     // Make a POST request to the lookout API endpoint to trigger the run
     const response = await fetch(
-      process.env.NODE_ENV === 'development' ? process.env.NGROK_URL + '/api/lookout' : `https://scira.ai/api/lookout`,
+      process.env.NODE_ENV === 'development' ? process.env.NGROK_URL + '/api/lookout' : `https://ritivel.ai/api/lookout`,
       {
         method: 'POST',
         headers: {
