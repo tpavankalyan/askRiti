@@ -19,7 +19,6 @@ app = FastAPI()
 @app.post("/regsearch", response_model=List[DocumentResponse])
 async def search_docs(request: QueryRequest):
     results = await main(request.query)
-    print(results)
     return results
 
 if __name__ == "__main__":

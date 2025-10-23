@@ -27,7 +27,6 @@ query_engine = CitationQueryEngine.from_args(
 async def search_documents(query: str) -> str:
     """Useful for answering natural language questions about Regulations present in CDSCO"""
     response = await query_engine.aquery(query)
-    print(response.source_nodes[0].node.get_text())
     return str(response)
 
 

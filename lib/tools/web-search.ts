@@ -734,7 +734,7 @@ const createSearchStrategy = (
   },
 ): SearchStrategy => {
   const strategies: Record<string, () => SearchStrategy> = {
-    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'http://localhost:8000'),
+    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'https://pyretrieval.vercel.app'),
     parallel: () => new ParallelSearchStrategy(clients.parallel, clients.firecrawl),
     tavily: () => new TavilySearchStrategy(clients.tvly),
     firecrawl: () => new FirecrawlSearchStrategy(clients.firecrawl),
@@ -805,7 +805,7 @@ export function webSearchTool(
         parallel: new Parallel({ apiKey: serverEnv.PARALLEL_API_KEY }),
         firecrawl: new FirecrawlApp({ apiKey: serverEnv.FIRECRAWL_API_KEY }),
         tvly: tavily({ apiKey: serverEnv.TAVILY_API_KEY }),
-        fastapi: serverEnv.FASTAPI_URL || 'http://localhost:8000',
+        fastapi: serverEnv.FASTAPI_URL || 'https://pyretrieval.vercel.app',
       };
 
       console.log('Queries:', queries);
