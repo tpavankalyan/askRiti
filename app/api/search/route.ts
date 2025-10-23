@@ -1,4 +1,6 @@
 // /app/api/chat/route.ts
+export const maxDuration = 300;
+
 import {
   generateTitleFromUserMessage,
   getGroupConfig,

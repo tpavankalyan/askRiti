@@ -1,4 +1,6 @@
 // /app/api/lookout/route.ts
+export const maxDuration = 300;
+
 import { generateTitleFromUserMessage } from '@/app/actions';
 import { convertToModelMessages, streamText, createUIMessageStream, stepCountIs, JsonToSseTransformStream } from 'ai';
 import { ritivel } from '@/ai/providers';
