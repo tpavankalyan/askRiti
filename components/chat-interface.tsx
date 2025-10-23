@@ -96,9 +96,9 @@ const ChatInterface = memo(
       false,
     );
 
-    const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl'>(
+const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco'>(
       'scira-search-provider',
-      'parallel',
+      'cdsco',
     );
 
     // Use reducer for complex state management

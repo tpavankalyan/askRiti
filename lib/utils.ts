@@ -36,6 +36,7 @@ export type SearchGroupId =
 
 // Search provider information for dynamic descriptions
 export const searchProviderInfo = {
+  cdsco: 'CDSCO',
   parallel: 'Parallel AI',
   exa: 'Exa',
   tavily: 'Tavily',
@@ -45,13 +46,13 @@ export const searchProviderInfo = {
 export type SearchProvider = keyof typeof searchProviderInfo;
 
 // Function to get dynamic web search description based on selected provider
-export function getWebSearchDescription(provider: SearchProvider = 'parallel'): string {
+export function getWebSearchDescription(provider: SearchProvider = 'cdsco'): string {
   const providerName = searchProviderInfo[provider];
   return `Search across the entire internet powered by ${providerName}`;
 }
 
 // Function to get search groups with dynamic descriptions
-export function getSearchGroups(searchProvider: SearchProvider = 'parallel') {
+export function getSearchGroups(searchProvider: SearchProvider = 'cdsco') {
   return [
     {
       id: 'web' as const,

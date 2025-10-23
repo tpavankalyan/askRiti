@@ -189,14 +189,31 @@ const FirecrawlIcon = ({ className }: { className?: string }) => (
   <span className={cn('text-base sm:text-lg !mb-3 !pr-1', className)}>🔥</span>
 );
 
+const CdscoIcon = ({ className }: { className?: string }) => (
+  <Image
+    src="https://cdsco.gov.in/opencms/export/sites/CDSCO_WEB/Image_folder/logo/cdscologo_lbg.png"
+    alt="CDSCO"
+    width={16}
+    height={16}
+    className={className}
+  />
+);
+
 // Search Provider Options
 const searchProviders = [
+  {
+    value: 'cdsco',
+    label: 'CDSCO',
+    description: 'Parallel-like web search (no images).',
+    icon: CdscoIcon,
+    default: true,
+  },
   {
     value: 'parallel',
     label: 'Parallel AI',
     description: 'Base and premium web search along with Firecrawl image search support',
     icon: ParallelIcon,
-    default: true,
+    default: false,
   },
   {
     value: 'firecrawl',
@@ -229,7 +246,7 @@ function SearchProviderSelector({
   className,
 }: {
   value: string;
-  onValueChange: (value: 'exa' | 'parallel' | 'tavily' | 'firecrawl') => void;
+  onValueChange: (value: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco') => void;
   disabled?: boolean;
   className?: string;
 }) {
@@ -282,9 +299,9 @@ export function PreferencesSection({
   setIsCustomInstructionsEnabled?: (value: boolean | ((val: boolean) => boolean)) => void;
 }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [searchProvider, setSearchProvider] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl'>(
+const [searchProvider, setSearchProvider] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco'>(
     'scira-search-provider',
-    'parallel',
+    'cdsco',
   );
 
   const [content, setContent] = useState('');
@@ -317,7 +334,7 @@ export function PreferencesSection({
   const enabled = isCustomInstructionsEnabled ?? true;
   const setEnabled = setIsCustomInstructionsEnabled ?? (() => { });
 
-  const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' | 'firecrawl') => {
+const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco') => {
     setSearchProvider(newProvider);
     toast.success(
       `Search provider changed to ${newProvider === 'exa'
@@ -326,7 +343,9 @@ export function PreferencesSection({
           ? 'Parallel AI'
           : newProvider === 'tavily'
             ? 'Tavily'
-            : 'Firecrawl'
+            : newProvider === 'firecrawl'
+              ? 'Firecrawl'
+              : 'CDSCO'
       }`,
     );
   };

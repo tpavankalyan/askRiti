@@ -242,6 +242,120 @@ class ParallelSearchStrategy implements SearchStrategy {
   }
 }
 
+// CDSCO search strategy (similar to Parallel but without images)
+class CDSCOSearchStrategy implements SearchStrategy {
+  constructor(private parallel: Parallel) { }
+
+  async search(
+    queries: string[],
+    options: {
+      maxResults: number[];
+      topics: ('general' | 'news')[];
+      quality: ('default' | 'best')[];
+      dataStream?: UIMessageStreamWriter<ChatMessage>;
+    },
+  ) {
+    const limitedQueries = queries.slice(0, 5);
+    console.log('Using CDSCO (Parallel-like) batch processing for queries:', limitedQueries);
+
+    // Start notifications
+    limitedQueries.forEach((query, index) => {
+      options.dataStream?.write({
+        type: 'data-query_completion',
+        data: {
+          query,
+          index,
+          total: limitedQueries.length,
+          status: 'started',
+          resultsCount: 0,
+          imagesCount: 0,
+        },
+      });
+    });
+
+    try {
+      const perQueryPromises = limitedQueries.map(async (query, index) => {
+        const currentQuality = options.quality[index] || options.quality[0] || 'default';
+        const currentMaxResults = options.maxResults[index] || options.maxResults[0] || 10;
+
+        try {
+          const singleResponse = await this.parallel.beta.search({
+            objective: query,
+            search_queries: [query],
+            processor: currentQuality === 'best' ? 'pro' : 'base',
+            max_results: Math.max(currentMaxResults, 10),
+            max_chars_per_result: 1000,
+          });
+
+          const results = (singleResponse?.results || []).map((result: any) => ({
+            url: result.url,
+            title: cleanTitle(result.title || ''),
+            content: Array.isArray(result.excerpts)
+              ? result.excerpts.join(' ').substring(0, 1000)
+              : (result.content || '').substring(0, 1000),
+            published_date: undefined,
+            author: undefined,
+          }));
+
+          options.dataStream?.write({
+            type: 'data-query_completion',
+            data: {
+              query,
+              index,
+              total: limitedQueries.length,
+              status: 'completed',
+              resultsCount: results.length,
+              imagesCount: 0,
+            },
+          });
+
+          return {
+            query,
+            results: deduplicateByDomainAndUrl(results),
+            images: [],
+          };
+        } catch (error) {
+          console.error(`CDSCO search error for query "${query}":`, error);
+          options.dataStream?.write({
+            type: 'data-query_completion',
+            data: {
+              query,
+              index,
+              total: limitedQueries.length,
+              status: 'error',
+              resultsCount: 0,
+              imagesCount: 0,
+            },
+          });
+          return { query, results: [], images: [] };
+        }
+      });
+
+      const searchResults = await Promise.all(perQueryPromises);
+      return { searches: searchResults };
+    } catch (error) {
+      console.error('CDSCO batch orchestration error:', error);
+      limitedQueries.forEach((query, index) => {
+        options.dataStream?.write({
+          type: 'data-query_completion',
+          data: {
+            query,
+            index,
+            total: limitedQueries.length,
+            status: 'error',
+            resultsCount: 0,
+            imagesCount: 0,
+          },
+        });
+      });
+
+      return {
+        searches: limitedQueries.map((query) => ({ query, results: [], images: [] })),
+      };
+    }
+  }
+}
+
 // Tavily search strategy
 class TavilySearchStrategy implements SearchStrategy {
   constructor(private tvly: TavilyClient) { }
@@ -608,7 +722,7 @@ class ExaSearchStrategy implements SearchStrategy {
 
 // Search provider factory
 const createSearchStrategy = (
-  provider: 'exa' | 'parallel' | 'tavily' | 'firecrawl',
+  provider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco',
   clients: {
     exa: Exa;
     parallel: Parallel;
@@ -616,7 +730,8 @@ const createSearchStrategy = (
     tvly: TavilyClient;
   },
 ): SearchStrategy => {
-  const strategies = {
+  const strategies: Record<string, () => SearchStrategy> = {
+    cdsco: () => new CDSCOSearchStrategy(clients.parallel),
     parallel: () => new ParallelSearchStrategy(clients.parallel, clients.firecrawl),
     tavily: () => new TavilySearchStrategy(clients.tvly),
     firecrawl: () => new FirecrawlSearchStrategy(clients.firecrawl),
@@ -628,7 +743,7 @@ const createSearchStrategy = (
 
 export function webSearchTool(
   dataStream?: UIMessageStreamWriter<ChatMessage> | undefined,
-  searchProvider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' = 'parallel',
+  searchProvider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco' = 'cdsco',
 ) {
   return tool({
     description: `This is the default tool of the app to be used to search the web for information with multiple queries, max results, search depth, topics, and quality.
@@ -681,7 +796,7 @@ export function webSearchTool(
       topics?: ('general' | 'news' | undefined)[];
       quality?: ('default' | 'best' | undefined)[];
     }) => {
-      // Initialize all clients
+// Initialize all clients
       const clients = {
         exa: new Exa(serverEnv.EXA_API_KEY),
         parallel: new Parallel({ apiKey: serverEnv.PARALLEL_API_KEY }),
