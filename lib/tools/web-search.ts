@@ -817,7 +817,7 @@ export function webSearchTool(
         parallel: new Parallel({ apiKey: serverEnv.PARALLEL_API_KEY }),
         firecrawl: new FirecrawlApp({ apiKey: serverEnv.FIRECRAWL_API_KEY }),
         tvly: tavily({ apiKey: serverEnv.TAVILY_API_KEY }),
-        fastapi: serverEnv.FASTAPI_URL || 'https://pyretrieval.vercel.app',
+        fastapi: serverEnv.FASTAPI_URL || 'https://askriti-fastapi-195347899917.us-central1.run.app',
       };
 
       console.log('Queries:', queries);
