@@ -49,7 +49,7 @@ export const serverEnv = createEnv({
     QSTASH_TOKEN: z.string().optional().default('dev-qstash-token'),
     RESEND_API_KEY: z.string().optional().default('dev-resend-key'),
     SUPERMEMORY_API_KEY: z.string().optional().default('dev-supermemory-key'),
-    FASTAPI_URL: z.string().optional().default('https://pyretrieval.vercel.app'),
+    FASTAPI_URL: z.string().optional().default('https://askriti-fastapi-195347899917.us-central1.run.app'),
     
     // Payment providers - make optional for development
     DODO_PAYMENTS_API_KEY: z.string().optional().default('dev-dodo-payments-key'),
@@ -61,7 +61,7 @@ export const serverEnv = createEnv({
     MICROSOFT_CLIENT_ID: z.string().optional().default('dev-microsoft-id'),
     MICROSOFT_CLIENT_SECRET: z.string().optional().default('dev-microsoft-secret'),
     
-    ALLOWED_ORIGINS: z.string().optional().default('https://pyretrieval.vercel.app/'),
+    ALLOWED_ORIGINS: z.string().optional().default('https://askriti-fastapi-195347899917.us-central1.run.app/'),
   },
   experimental__runtimeEnv: process.env,
 });

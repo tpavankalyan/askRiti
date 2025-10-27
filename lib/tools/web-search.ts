@@ -96,7 +96,7 @@ interface SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: 'fda' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ): Promise<{ searches: Array<{ query: string; results: any[]; images: any[] }> }>;
@@ -115,7 +115,7 @@ class ParallelSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: 'fda' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -809,7 +809,7 @@ export function webSearchTool(
       maxResults?: (number | undefined)[];
       topics?: ('general' | 'news' | undefined)[];
       quality?: ('default' | 'best' | undefined)[];
-      market?: 'cdsco' | 'fda';
+      market?: 'fda' | 'cdsco';
     }) => {
 // Initialize all clients
       const clients = {
@@ -842,7 +842,7 @@ export function webSearchTool(
         maxResults: maxResults as number[],
         topics: topics as ('general' | 'news')[],
         quality: quality as ('default' | 'best')[],
-        market: market || 'cdsco',
+        market: market || 'fda',
         dataStream,
       });
     },
