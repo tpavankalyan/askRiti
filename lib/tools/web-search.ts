@@ -96,6 +96,7 @@ interface SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
+      market?: 'cdsco' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ): Promise<{ searches: Array<{ query: string; results: any[]; images: any[] }> }>;
@@ -114,6 +115,7 @@ class ParallelSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
+      market?: 'cdsco' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -252,6 +254,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
+      market?: 'cdsco' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -281,7 +284,10 @@ class CDSCOSearchStrategy implements SearchStrategy {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ query }),
+            body: JSON.stringify({ 
+              query,
+              market: options.market || 'fda'
+            }),
           });
 
           if (!response.ok) {
@@ -370,6 +376,7 @@ class TavilySearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
+      market?: 'cdsco' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -488,6 +495,7 @@ class FirecrawlSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
+      market?: 'cdsco' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -620,8 +628,7 @@ class ExaSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      include_domains?: string[];
-      exclude_domains?: string[];
+      market?: 'cdsco' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -789,17 +796,20 @@ export function webSearchTool(
             'Array of quality levels for the search. Default is default. Other option is best. DO NOT use best unless necessary.',
           ),
       ).optional(),
+      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in. Options are cdsco or fda. Default is cdsco.'),
     }),
     execute: async ({
       queries,
       maxResults,
       topics,
       quality,
+      market,
     }: {
       queries: string[];
       maxResults?: (number | undefined)[];
       topics?: ('general' | 'news' | undefined)[];
       quality?: ('default' | 'best' | undefined)[];
+      market?: 'cdsco' | 'fda';
     }) => {
 // Initialize all clients
       const clients = {
@@ -815,6 +825,7 @@ export function webSearchTool(
       console.log('Topics:', topics);
       console.log('Quality:', quality);
       console.log('Search Provider:', searchProvider);
+      console.log('Market:', market);
 
       // Create and use the appropriate search strategy
       const strategy = createSearchStrategy(searchProvider, clients);
@@ -831,6 +842,7 @@ export function webSearchTool(
         maxResults: maxResults as number[],
         topics: topics as ('general' | 'news')[],
         quality: quality as ('default' | 'best')[],
+        market: market || 'cdsco',
         dataStream,
       });
     },
