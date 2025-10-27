@@ -743,7 +743,7 @@ const createSearchStrategy = (
   },
 ): SearchStrategy => {
   const strategies: Record<string, () => SearchStrategy> = {
-    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'https://askriti-python-bknd.vercel.app'),
+    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'https://askriti-fastapi-195347899917.us-central1.run.app'),
     parallel: () => new ParallelSearchStrategy(clients.parallel, clients.firecrawl),
     tavily: () => new TavilySearchStrategy(clients.tvly),
     firecrawl: () => new FirecrawlSearchStrategy(clients.firecrawl),
