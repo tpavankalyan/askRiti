@@ -286,7 +286,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
             },
             body: JSON.stringify({ 
               query,
-              market: options.market || 'fda'
+              market: options.market || 'cdsco'
             }),
           });
 
@@ -770,6 +770,15 @@ export function webSearchTool(
       - For time-sensitive topics: "newest", "updated", "${new Date().getFullYear()}"
       - **NO TEMPORAL ASSUMPTIONS**: Never assume time periods - always be explicit about dates/years
       - Examples: "latest AI news ${new Date().getFullYear()}", "current stock prices today", "recent developments in ${new Date().getFullYear()}"
+    
+    ### Market Selection for Regulatory Searches (CDSCO vs FDA):
+    - **Use 'fda' market**: For US-based queries, FDA regulations, US pharmaceutical companies, FDA-approved drugs, US medical devices
+    - **Use 'cdsco' market**: For India-based queries, CDSCO regulations, Indian pharmaceutical companies, India drug approvals, Indian medical devices
+    - **Decision logic**:
+      - If user mentions "India", "CDSCO", "Indian", "India-based" → use 'cdsco'
+      - If user mentions "US", "FDA", "American", "US-based" → use 'fda'
+      - If no market specified → default to 'cdsco'
+    - **Context matters**: The market parameter selects which regulatory database to search (CDSCO for India, FDA for US)
     `,
     inputSchema: z.object({
       queries: z.array(
@@ -796,7 +805,7 @@ export function webSearchTool(
             'Array of quality levels for the search. Default is default. Other option is best. DO NOT use best unless necessary.',
           ),
       ).optional(),
-      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in. Options are cdsco or fda. Default is cdsco.'),
+      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for India/CDSCO regulatory information. Defaults to "cdsco" if not specified.'),
     }),
     execute: async ({
       queries,
@@ -842,7 +851,7 @@ export function webSearchTool(
         maxResults: maxResults as number[],
         topics: topics as ('general' | 'news')[],
         quality: quality as ('default' | 'best')[],
-        market: market || 'fda',
+        market: market || 'cdsco',
         dataStream,
       });
     },

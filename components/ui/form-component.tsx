@@ -1724,10 +1724,18 @@ const GroupModeToggle: React.FC<GroupSelectorProps> = React.memo(
     const { data: session } = useSession();
     const [open, setOpen] = useState(false);
     const isMobile = useIsMobile();
-    const isExtreme = selectedGroup === 'extreme';
-
+    const [mounted, setMounted] = useState(false);
+    
     // Get search provider from localStorage with reactive updates
 const [searchProvider] = useLocalStorage<SearchProvider>('ritivel-search-provider', 'cdsco');
+    
+    // Only compute isExtreme after mounting to prevent hydration mismatch
+    const isExtreme = mounted && selectedGroup === 'extreme';
+    
+    // Set mounted to true after component mounts
+    useEffect(() => {
+      setMounted(true);
+    }, []);
 
     // Get dynamic search groups based on the selected search provider
     const dynamicSearchGroups = useMemo(() => getSearchGroups(searchProvider), [searchProvider]);
