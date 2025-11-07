@@ -53,6 +53,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { CONNECTOR_CONFIGS, CONNECTOR_ICONS, type ConnectorProvider } from '@/lib/connectors';
 import { useQuery } from '@tanstack/react-query';
 import { listUserConnectorsAction } from '@/app/actions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Pro Badge Component
 const ProBadge = ({ className = '' }: { className?: string }) => (
@@ -2264,6 +2265,12 @@ const FormComponent: React.FC<FormComponentProps> = ({
 
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [market, setMarket] = useLocalStorage<string>('ritivel-market', 'India');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isProUser = useMemo(
     () => user?.isProUser || (subscriptionData?.hasSubscription && subscriptionData?.subscription?.status === 'active'),
@@ -3349,6 +3356,10 @@ const FormComponent: React.FC<FormComponentProps> = ({
               type: 'text',
               text: input,
             },
+            {
+              type: 'text',
+              text: `MARKET: ${market || 'India'}`,
+            },
           ],
         });
 
@@ -3703,6 +3714,24 @@ const FormComponent: React.FC<FormComponentProps> = ({
                     onOpenSettings={onOpenSettings}
                     isProUser={isProUser}
                   />
+
+                {mounted && (
+                  <Select value={market} onValueChange={setMarket}>
+                    <SelectTrigger size="sm" className="h-8 px-2 text-xs">
+                      <SelectValue placeholder="Market" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="US">US</SelectItem>
+                      <SelectItem value="India">India</SelectItem>
+                      <SelectItem value="Tanzania">Tanzania</SelectItem>
+                      <SelectItem value="Uganda">Uganda</SelectItem>
+                      <SelectItem value="Phillippines">Phillippines</SelectItem>
+                      <SelectItem value="Vietnam">Vietnam</SelectItem>
+                      <SelectItem value="Azerbaijan">Azerbaijan</SelectItem>
+                      <SelectItem value="Chile">Chile</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
 
                   {selectedGroup === 'connectors' && setSelectedConnectors && (
                     <ConnectorSelector

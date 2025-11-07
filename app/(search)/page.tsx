@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import React from 'react';
+import { suggestQuestions, updateChatVisibility } from '@/app/actions';
 
 const ChatInterface = dynamic(() => import('@/components/chat-interface').then(m => m.ChatInterface), {
   ssr: true,
@@ -11,7 +12,7 @@ import { InstallPrompt } from '@/components/InstallPrompt';
 const Home = () => {
   return (
     <React.Fragment>
-      <ChatInterface />
+      <ChatInterface suggestQuestions={suggestQuestions} updateChatVisibility={updateChatVisibility} />
       <InstallPrompt />
     </React.Fragment>
   );

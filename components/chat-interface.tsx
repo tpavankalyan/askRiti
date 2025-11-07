@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { v7 as uuidv7 } from 'uuid';
 
 // Internal app imports
-import { suggestQuestions, updateChatVisibility } from '@/app/actions';
+// Server actions are passed from a Server Component to avoid importing them directly here
 
 // Component imports
 import { ChatDialogs } from '@/components/chat-dialogs';
@@ -48,6 +48,8 @@ interface ChatInterfaceProps {
   initialMessages?: any[];
   initialVisibility?: 'public' | 'private';
   isOwner?: boolean;
+  suggestQuestions?: (history: any[]) => Promise<any>;
+  updateChatVisibility?: (chatId: string, visibility: 'public' | 'private') => Promise<any>;
 }
 
 const ChatInterface = memo(
@@ -56,6 +58,8 @@ const ChatInterface = memo(
     initialMessages,
     initialVisibility = 'private',
     isOwner = true,
+    suggestQuestions,
+    updateChatVisibility,
   }: ChatInterfaceProps): React.JSX.Element => {
     const router = useRouter();
     const [query] = useQueryState('query', parseAsString.withDefault(''));
@@ -315,8 +319,10 @@ const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'fir
             { role: 'assistant', content: lastPartText },
           ];
           console.log('newHistory', newHistory);
-          const { questions } = await suggestQuestions(newHistory);
-          dispatch({ type: 'SET_SUGGESTED_QUESTIONS', payload: questions });
+          if (suggestQuestions) {
+            const { questions } = await suggestQuestions(newHistory);
+            dispatch({ type: 'SET_SUGGESTED_QUESTIONS', payload: questions });
+          }
         }
       },
       onError: (error) => {
@@ -437,8 +443,10 @@ const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'fir
               { role: 'assistant', content: getAssistantContent(lastAssistantMessage) },
             ];
             try {
-              const { questions } = await suggestQuestions(newHistory);
-              dispatch({ type: 'SET_SUGGESTED_QUESTIONS', payload: questions });
+          if (suggestQuestions) {
+            const { questions } = await suggestQuestions(newHistory);
+            dispatch({ type: 'SET_SUGGESTED_QUESTIONS', payload: questions });
+          }
             } catch (error) {
               console.error('Error generating suggested questions:', error);
             }
@@ -535,6 +543,7 @@ const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'fir
 
         try {
           console.log('📡 Calling updateChatVisibility with:', { chatId, visibility });
+          if (!updateChatVisibility) return;
           const result = await updateChatVisibility(chatId, visibility);
           console.log('✅ updateChatVisibility response:', result);
           console.log('🔍 Result structure analysis:', {
