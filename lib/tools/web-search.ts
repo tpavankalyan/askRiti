@@ -214,7 +214,7 @@ const getRegulatoryAuthorityForCountry = (country: string): string | undefined =
     return matchedEntry[1];
   }
 
-  return regulatoryAuthorities.Global;
+  return undefined;
 };
 
 // Search provider strategy interface
@@ -225,7 +225,7 @@ interface SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'fda' | 'cdsco';
+      market?: string;
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ): Promise<{ searches: Array<{ query: string; results: any[]; images: any[] }> }>;
@@ -244,7 +244,7 @@ class ParallelSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'fda' | 'cdsco';
+      market?: string;
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -383,7 +383,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: string;
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -471,22 +471,24 @@ class CDSCOSearchStrategy implements SearchStrategy {
             components: filledComponents,
           });
 
-          const regulatoryAuthority =
-            getRegulatoryAuthorityForCountry(filledComponents.country) || options.market || 'cdsco';
+          const requestBody: Record<string, unknown> = {
+            query: reformulatedQuery,
+          };
+
+          if (filledComponents.country && filledComponents.country.trim().toLowerCase() !== 'global') {
+            requestBody.market = getRegulatoryAuthorityForCountry(filledComponents.country);
+          }
 
           const response = await fetch(`${this.apiUrl}/regsearch`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
-              query: reformulatedQuery,
-              market: regulatoryAuthority,
-              country: filledComponents.country,
-              topics: filledComponents.topic,
-              productCategories: filledComponents.productCategory,
-            }),
+            body: JSON.stringify(requestBody),
           });
+
+          // console.log('request', requestBody);
+          // console.log('response', response);
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -574,7 +576,7 @@ class TavilySearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: string;
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -693,7 +695,7 @@ class FirecrawlSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: string;
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -826,7 +828,7 @@ class ExaSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: string;
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -958,13 +960,11 @@ export function webSearchTool(
       - Examples: "latest drug approvals ${new Date().getFullYear()}", "current regulatory status", "recent pharmaceutical regulations in ${new Date().getFullYear()}"
     
     ### Market Selection for Regulatory Searches (ROW Markets):
-    - **Use 'fda' market**: For US-based queries, FDA regulations, US pharmaceutical companies, FDA-approved drugs, US medical devices
-    - **Use 'cdsco' market**: For ROW (Rest of World) market queries including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. This includes CDSCO regulations, pharmaceutical companies, drug approvals, and medical devices in ROW markets
-    - **Decision logic**:
-      - If user mentions "US", "FDA", "American", "US-based" → use 'fda'
-      - If user mentions any ROW market (India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, etc.) or "ROW", "Rest of World" → use 'cdsco'
-      - If no market specified → default to 'cdsco' (ROW markets)
-    - **Context matters**: The market parameter selects which regulatory database to search (FDA for US, ROW regulatory databases for Rest of World markets)
+    - Always return a single market label representing the identified country.
+    - If the user states a country name, return that exact country name.
+    - If the user only names a regulatory authority (e.g. "CDSCO", "NDA Uganda", "ISP Chile"), map it to its country and return that country's name.
+    - If neither a country nor an authority is provided, return "Global".
+    - The backend maps these country labels to specific regulatory authority datasets (see regulatoryAuthorities map).
     `,
     inputSchema: z.object({
       queries: z.array(
@@ -991,7 +991,10 @@ export function webSearchTool(
             'Array of quality levels for the search. Default is default. Other option is best. DO NOT use best unless necessary.',
           ),
       ).optional(),
-      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for ROW (Rest of World) markets regulatory information including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Defaults to "cdsco" (ROW markets) if not specified.'),
+      market: z
+        .string()
+        .optional()
+        .describe('Override regulatory authority/market identifier (normally inferred from the user query).'),
     }),
     execute: async ({
       queries,
@@ -1004,7 +1007,7 @@ export function webSearchTool(
       maxResults?: (number | undefined)[];
       topics?: ('general' | 'news' | undefined)[];
       quality?: ('default' | 'best' | undefined)[];
-      market?: 'fda' | 'cdsco';
+      market?: string;
     }) => {
       // Initialize Regulatory Search (ROW markets) client only - all other providers are inactive
       const clients = {
@@ -1033,7 +1036,7 @@ export function webSearchTool(
         maxResults: maxResults as number[],
         topics: topics as ('general' | 'news')[],
         quality: quality as ('default' | 'best')[],
-        market: market || 'cdsco',
+        market,
         dataStream,
       });
     },
