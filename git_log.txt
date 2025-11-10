@@ -1,0 +1,100 @@
+  624      "query": "Eslicarbazepine Acetate",
+  625      "market": "FDA Home"
+  626    }'
+  627  clear
+  628  curl -X POST "http://localhost:5001/regsearch"   -H "Content-Type: application/json"   -d '{
+  629      "query": "Eslicarbazepine Acetate",
+  630      "market": "FDA Home"
+  631    }'
+  632  curl -X POST "http://localhost:5001/regsearch"   -H "Content-Type: application/json"   -d '{
+  633      "query": "Eslicarbazepine Acetate",
+  634      "market": "FDA Home"
+  635    }'
+  636  curl -X POST "http://localhost:5001/regsearch"   -H "Content-Type: application/json"   -d '{
+  637      "query": "Eslicarbazepine Acetate",
+  638      "market": "FDA Home"
+  639    }'
+  640  curl -X POST "http://localhost:5001/regsearch"   -H "Content-Type: application/json"   -d '{
+  641      "query": "Eslicarbazepine Acetate",
+  642      "market": "FDA Home"
+  643    }'
+  644  cd fastapi/
+  645  bash test.sh 
+  646  curl -X POST "http://localhost:5001/regsearch"   -H "Content-Type: application/json"   -d '{
+  647      "query": "Eslicarbazepine Acetate",
+  648      "market": "FDA Home"
+  649    }'
+  650  bash test.sh 
+  651  clear
+  652  git clone git@github.com:tpavankalyan/askRiti.git
+  653  cd askRiti/
+  654  cursor .
+  655  git pull
+  656  git status
+  657  git branchs -a
+  658  git branch -a
+  659  clear
+  660  npm run dev
+  661  git pull
+  662  source /home/nirmit/askriti-python-bknd/venv/bin/activate
+  663  cd fastapi/
+  664  bash test.sh 
+  665  git checkout -b nirmit/lance-db-fda
+  666  git status
+  667  git add .
+  668  git commit -m "code dump for fda and lance db from nirmit's local"
+  669  git status
+  670  git checkout main
+  671  git pull
+  672  git status
+  673  git log
+  674  git status
+  675  source venv/bin/activate
+  676  uvicorn main:app --reload --port 5001
+  677  cd fastapi/
+  678  uvicorn main:app --reload --port 5001
+  679  which pip
+  680  pip show openai
+  681  pip istall llama-index llama-index-core llama-index-embeddings-openai llama-index-llms-openai llama-index-vector-stores-pinecone pinecone
+  682  pip install llama-index llama-index-core llama-index-embeddings-openai llama-index-llms-openai llama-index-vector-stores-pinecone pinecone
+  683  uvicorn main:app --reload --port 5001
+  684  cd ..
+  685  git status
+  686  git add fastapi/ask_lancedb.py 
+  687  git addd fastapi/main.py
+  688  git add fastapi/main.py
+  689  git status
+  690  git commit -m "remove fda and lancedb usage in backend server"
+  691  git push 
+  692  cd -
+  693  uvicorn main:app --reload --port 5001
+  694  pip install llama-index-embeddings-google
+  695  pip install google-generativeai
+  696  uvicorn main:app --reload --port 5001
+  697  pip show llama-index-embeddings-google
+  698  pip show llama-index-embeddings-google-genai
+  699  pip install llama-index-embeddings-google-genai
+  700  uvicorn main:app --reload --port 5001
+  701  git status
+  702  git add main.py 
+  703  git add requirements.txt 
+  704  git commit -m "use the new ritivel index on pinecone instead of the old free trial pinecone index"
+  705  git status
+  706  curl -X POST "http://localhost:5001/regsearch"   -H "Content-Type: application/json"   -d '{
+  707      "query": "Eslicarbazepine Acetate",
+  708      "market": "DAV Home"
+  709    }'
+  710  uvicorn main:app --reload --port 5001
+  711  git status
+  712  git add  main.py 
+  713  git add test.sh 
+  714  git commit -m "add the market filter and the top_k filter to the retrieval"
+  715  git push
+  716  git pull
+  717  git status
+  718  git add .
+  719  git commit -m "break the 3 promptified queries into components to check presence of all components and make a curated retrieval query"
+  720  git push
+  721  history 20
+  722  history 100
+  723  history 100 > git_log.txt
