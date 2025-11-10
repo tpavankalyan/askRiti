@@ -42,12 +42,14 @@ function hasTitleNode(node: React.ReactNode): boolean {
       return false;
     }
 
-    if (child.type === SheetPrimitive.Title) {
+    const element = child as React.ReactElement<{ children?: React.ReactNode }>;
+
+    if (element.type === SheetPrimitive.Title || element.type === SheetTitle) {
       return true;
     }
 
-    if (child.props?.children) {
-      return hasTitleNode(child.props.children);
+    if (element.props?.children) {
+      return hasTitleNode(element.props.children);
     }
 
     return false;

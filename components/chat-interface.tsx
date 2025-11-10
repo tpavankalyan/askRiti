@@ -8,6 +8,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useReducer, useSt
 import { useChat } from '@ai-sdk/react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Crown02Icon } from '@hugeicons/core-free-icons';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { parseAsString, useQueryState } from 'nuqs';
 import { toast } from 'sonner';
@@ -42,6 +43,15 @@ import { chatReducer, createInitialState } from '@/components/chat-state';
 import { useDataStream } from './data-stream-provider';
 import { DefaultChatTransport } from 'ai';
 import { ChatMessage } from '@/lib/types';
+
+const COVERED_COUNTRIES = ['Vietnam', 'Philippines', 'Tanzania', 'Uganda', 'Chile', 'Azerbaijan'] as const;
+
+const SAMPLE_PROMPTS = [
+  'What is the dossier format for hospital product registration in Vietnam?',
+  'Outline the pharmacovigilance reporting timelines for Chile.',
+  'Summarize labeling requirements for imported generics in Tanzania.',
+  'List the key submission documents for renewing market authorization in the Philippines.',
+] as const;
 
 interface ChatInterfaceProps {
   initialChatId?: string;
@@ -139,6 +149,16 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
     const fileInputRef = useRef<HTMLInputElement>(null!);
     const inputRef = useRef<HTMLTextAreaElement>(null!);
     const initializedRef = useRef(false);
+
+    const handleSamplePromptClick = useCallback(
+      (prompt: string) => {
+        setInput(prompt);
+        requestAnimationFrame(() => {
+          inputRef.current?.focus();
+        });
+      },
+      [setInput],
+    );
 
     // Use optimized scroll hook
     const { scrollToBottom, markManualScroll, resetManualScroll } = useOptimizedScroll(bottomRef);
@@ -363,6 +383,9 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
       },
       messages: initialMessages || [],
     });
+
+    const showEmptyState = status === 'ready' && messages.length === 0;
+    const showSamplePrompts = showEmptyState && !isLimitBlocked;
 
     // Handle text highlighting and quoting
     const handleHighlight = useCallback(
@@ -662,29 +685,58 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
 
 
         <div
-          className={`w-full p-2 sm:p-4 relative ${status === 'ready' && messages.length === 0
+          className={`w-full p-2 sm:p-4 relative ${showEmptyState
               ? 'flex-1 !flex !flex-col !items-center !justify-center' // Center everything when no messages
               : '!mt-20 sm:!mt-16 flex !flex-col' // Add top margin when showing messages
             }`}
         >
           <div className={`w-full max-w-[95%] sm:max-w-2xl space-y-6 p-0 mx-auto transition-all duration-300`}>
-            {status === 'ready' && messages.length === 0 && (
-              <div className="text-center m-0 mb-2">
-                <div className="inline-flex items-center gap-3">
-                  <h1 className="text-4xl sm:text-5xl !mb-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 bg-clip-text text-transparent font-be-vietnam-pro! font-light tracking-tighter">
+            {showEmptyState && (
+              <div className="mx-auto mt-2 space-y-5 text-center">
+                <div className="inline-flex items-center gap-1.5">
+                  <h1 className="text-3xl sm:text-[2.6rem] !mb-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 bg-clip-text text-transparent font-be-vietnam-pro! font-light tracking-tighter">
                     ritivel
                   </h1>
                   {isUserPro && (
-                    <h1 className="text-2xl font-baumans! leading-4 inline-block !px-3 !pt-1 !pb-2.5 rounded-xl shadow-sm !m-0 !mt-2 bg-gradient-to-br from-blue-500/25 via-blue-600/20 to-blue-700/25 text-foreground ring-1 ring-ring/35 ring-offset-1 ring-offset-background dark:bg-gradient-to-br dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 dark:text-foreground">
+                    <h1 className="text-base font-baumans! leading-4 inline-block !px-3 !py-1 rounded-lg shadow-sm !m-0 bg-gradient-to-br from-blue-500/20 via-blue-600/15 to-blue-700/20 text-foreground ring-1 ring-ring/25 ring-offset-[2px] ring-offset-background dark:bg-gradient-to-br dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 dark:text-foreground">
                       pro
                     </h1>
                   )}
                 </div>
+
+                <p className="mx-auto max-w-2xl text-balance text-sm text-muted-foreground sm:text-base">
+                  Ritivel is the regulatory intelligence co-pilot for life sciences teams. Ask about submission pathways,
+                  safety reporting, or market entry rules and get sourced answers in seconds.
+                </p>
+
+                <div className="mx-auto flex max-w-xl flex-wrap items-center justify-center gap-1.5 text-xs sm:text-sm">
+                  {COVERED_COUNTRIES.map((country) => (
+                    <span
+                      key={country}
+                      className="rounded-full border border-primary/15 bg-primary/8 px-3 py-1 font-medium text-primary/90"
+                    >
+                      {country}
+                    </span>
+                  ))}
+                </div>
+
+                <p className="text-xs text-muted-foreground sm:text-sm">
+                  Need to go deeper?{' '}
+                  <Link
+                    href="https://www.ritivel.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Visit ritivel.com
+                  </Link>{' '}
+                  to learn more about our team and roadmap.
+                </p>
               </div>
             )}
 
             {/* Show initial limit exceeded message */}
-            {status === 'ready' && messages.length === 0 && isLimitBlocked && (
+            {showEmptyState && isLimitBlocked && (
               <div className="mt-16 mx-auto max-w-sm">
                 <div className="bg-card backdrop-blur-xl border border-border/40 rounded-2xl shadow-2xl overflow-hidden">
                   {/* Header Section */}
@@ -774,6 +826,20 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
                     : 'fixed bottom-0 left-0 right-0 z-20 !pb-6 mt-1 mx-4 sm:mx-2 p-0',
                 )}
               >
+                {showSamplePrompts && (
+                  <div className="mx-auto mb-4 grid w-full max-w-2xl gap-2 sm:grid-cols-2">
+                    {SAMPLE_PROMPTS.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        className="flex items-start justify-start rounded-xl border border-border/60 bg-card/80 px-4 py-3 text-left text-sm font-medium text-foreground leading-snug shadow-sm transition hover:-translate-y-[1px] hover:border-primary/35 hover:bg-primary/5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 dark:hover:border-primary/35"
+                        onClick={() => handleSamplePromptClick(prompt)}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <FormComponent
                   chatId={chatId}
                   user={user!}

@@ -2153,7 +2153,8 @@ const [searchProvider] = useLocalStorage<SearchProvider>('ritivel-search-provide
             </Popover>
           )}
 
-          {/* Extreme Mode Side */}
+          {/*
+            Extreme Mode Side - disabled by request
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -2191,25 +2192,25 @@ const [searchProvider] = useLocalStorage<SearchProvider>('ritivel-search-provide
                 <p className="text-[11px] leading-snug text-secondary">
                   Deep research with multiple sources and in-depth analysis with 3x sources
                 </p>
-                {/* COMMENTED OUT - Pro upgrade message removed since Extreme Search is now available to all users
-                {!isProUser && (
-                  <div className="pt-1 border-t border-border/50">
-                    <a
-                      href="/pricing"
-                      className="flex items-start gap-1 rounded py-1 transition-colors cursor-pointer group"
-                    >
-                      <HugeiconsIcon icon={Crown02Icon} size={14} strokeWidth={2} className="flex-shrink-0 text-secondary group-hover:scale-110 transition-transform" />
-                      <span className="font-semibold text-[11px] text-secondary group-hover:underline flex items-center gap-0.5">
-                        Get unlimited searches with Pro
-                        <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </span>
-                    </a>
-                  </div>
-                )}
-                */}
+                // PRO upgrade message removed since Extreme Search is now available to all users
+                // {!isProUser && (
+                //   <div className="pt-1 border-t border-border/50">
+                //     <a
+                //       href="/pricing"
+                //       className="flex items-start gap-1 rounded py-1 transition-colors cursor-pointer group"
+                //     >
+                //       <HugeiconsIcon icon={Crown02Icon} size={14} strokeWidth={2} className="flex-shrink-0 text-secondary group-hover:scale-110 transition-transform" />
+                //       <span className="font-semibold text-[11px] text-secondary group-hover:underline flex items-center gap-0.5">
+                //         Get unlimited searches with Pro
+                //         <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                //       </span>
+                //     </a>
+                //   </div>
+                // )}
               </div>
             </TooltipContent>
           </Tooltip>
+          */}
         </div>
       </div>
     );
@@ -3697,6 +3698,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                     isProUser={isProUser}
                   />
 
+                {/* COMMENTED OUT - Market selection disabled per requirements
                 {mounted && (
                   <Select value={market} onValueChange={setMarket}>
                     <SelectTrigger size="sm" className="h-8 px-2 text-xs">
@@ -3714,6 +3716,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                     </SelectContent>
                   </Select>
                 )}
+                */}
 
                   {selectedGroup === 'connectors' && setSelectedConnectors && (
                     <ConnectorSelector
@@ -3747,6 +3750,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                 </div>
 
                 <div className={cn('flex items-center flex-shrink-0 gap-1')}>
+                  {/* 
                   {hasVisionSupport(selectedModel) && (
                     <Tooltip delayDuration={300}>
                       <TooltipTrigger asChild>
@@ -3782,6 +3786,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
+                  */}
 
                   {/* Show enhance button when there's input */}
                   {(input.length > 0 || isEnhancing || isTypewriting) && (
