@@ -57,3 +57,5 @@ The app will now run with fallback values if these environment variables are not
 2. Add them to your `.env.local` file
 3. Restart your development server
 4. Test the subscription flow
+
+done
