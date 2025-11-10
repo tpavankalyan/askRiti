@@ -101,7 +101,11 @@ const formatMissingComponentPrompt = (query: string, missing: (keyof QueryCompon
       ? labels[0]
       : `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
 
-  return `To continue the regulatory search for "${query}", could you specify the ${labelText}?`;
+  const countryNotice = missing.includes('country')
+    ? ' If your market is not yet supported, no worries—we are indexing new countries soon and will prioritise your request.'
+    : '';
+
+  return `To proceed with a regulatory search for "${query}", please confirm the ${labelText} (cover drug/product category, regulatory topic, and country where applicable).${countryNotice}`;
 };
 
 const normalizeComponentList = (value?: unknown): string[] | undefined => {
@@ -127,12 +131,13 @@ const extractQueryComponents = async (query: string): Promise<QueryComponents> =
     const { object } = await generateObject({
       model: ritivel.languageModel('ritivel-gpt5-mini'),
       schema: queryComponentExtractionSchema,
-      prompt: `Break the following regulatory research query into up to three high-level components:
-- topic (regulatory subject, type of approval, therapeutic area, etc.). Return as a list of distinct values.
-- product category (drug class, medical device type, biologic, etc.). Return as a list of distinct values.
-- country (specific market or regulatory authority jurisdiction)
+      prompt: `You are preparing a regulatory intelligence search query for life-sciences compliance teams.
+Break the user's request into up to three high-value components:
+- topic (regulatory focus such as submission pathway, vigilance, labelling, renewals, pricing, post-market commitments)
+- productCategory (drug class, biologic type, medical device category, diagnostic, vaccine, etc.)
+- country (specific market or competent authority jurisdiction; only choose from Uganda, Tanzania, Azerbaijan, Chile, Vietnam, Philippines, Global)
 
-Return only the fields you can confidently infer from the user's text. Keep values concise (max 6 words). If unsure, omit the field or list.
+Use concise phrases (≤6 words) and include only details that are explicitly stated or strongly implied. If a component is missing, omit it rather than guessing.
 
 User query: "${query}"`,
       temperature: 0,
@@ -156,15 +161,13 @@ const reformulateQueryWithComponents = async (
   try {
     const { text } = await generateText({
       model: ritivel.languageModel('ritivel-gpt5-mini'),
-      prompt: `Reformulate a regulatory search query that focuses explicitly on the provided components.
+      prompt: `Reformulate a regulatory affairs search query for life-science compliance teams.
+Incorporate every confirmed component:
+- Product category: ${components.productCategory.join('; ') || 'unspecified'}
+- Regulatory topic: ${components.topic.join('; ') || 'unspecified'}
+- Country/market: ${components.country}
 
-Original user query: "${originalQuery}"
-Topics: ${components.topic.join('; ')}
-Product categories: ${components.productCategory.join('; ')}
-Country: ${components.country}
-Current year: ${new Date().getFullYear()}
-
-Produce a single search query (max 25 words) that is precise, includes the current year or "latest"/"current" phrasing, and emphasizes all three components. Return only the query text without additional commentary.`,
+Include the current year (${new Date().getFullYear()}) or language like "latest"/"current" to set temporal context. Use ≤25 words, stay neutral, and avoid speculation or adjectives. Return only the final query text.`,
       temperature: 0.2,
     });
 
@@ -214,7 +217,7 @@ const getRegulatoryAuthorityForCountry = (country: string): string | undefined =
     return matchedEntry[1];
   }
 
-  return regulatoryAuthorities.Global;
+  return undefined;
 };
 
 // Search provider strategy interface
@@ -225,7 +228,7 @@ interface SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'fda' | 'cdsco';
+      market?: 'fda' | 'regulatory';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ): Promise<{ searches: Array<{ query: string; results: any[]; images: any[] }> }>;
@@ -244,7 +247,7 @@ class ParallelSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'fda' | 'cdsco';
+      market?: 'fda' | 'regulatory';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -383,7 +386,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: 'regulatory' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -409,10 +412,10 @@ class CDSCOSearchStrategy implements SearchStrategy {
       const perQueryPromises = limitedQueries.map(async (query, index) => {
         try {
           const components = await extractQueryComponents(query);
-          const requiredKeys: (keyof QueryComponents)[] = ['topic', 'productCategory', 'country'];
+          const clarificationKeys: (keyof QueryComponents)[] = ['topic', 'productCategory', 'country'];
           console.log('components', components);
-          console.log('requiredKeys', requiredKeys);
-          const missingComponents = requiredKeys.filter((key) => {
+          console.log('requiredKeys', clarificationKeys);
+          const missingComponents = clarificationKeys.filter((key) => {
             const value = components[key];
             if (Array.isArray(value)) {
               return value.length === 0;
@@ -420,6 +423,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
             return !value || value.trim().length === 0;
           });
           console.log('missingComponents', missingComponents);
+
           if (missingComponents.length > 0) {
             const clarificationPrompt = formatMissingComponentPrompt(query, missingComponents);
 
@@ -441,7 +445,9 @@ class CDSCOSearchStrategy implements SearchStrategy {
                 transient: true,
               });
             }
+          }
 
+          if (missingComponents.includes('country')) {
             options.dataStream?.write({
               type: 'data-query_completion',
               data: {
@@ -454,13 +460,16 @@ class CDSCOSearchStrategy implements SearchStrategy {
               },
             });
 
-            console.warn(`Skipping regulatory search for "${query}" due to missing components:`, missingComponents);
+            console.warn(`Skipping regulatory search for "${query}" due to missing country component.`);
             return { query, results: [], images: [] };
           }
 
           const filledComponents: FilledQueryComponents = {
-            topic: components.topic!,
-            productCategory: components.productCategory!,
+            topic: components.topic && components.topic.length > 0 ? components.topic : ['regulatory requirements'],
+            productCategory:
+              components.productCategory && components.productCategory.length > 0
+                ? components.productCategory
+                : ['all product categories'],
             country: components.country!,
           };
           const reformulatedQuery = await reformulateQueryWithComponents(query, filledComponents);
@@ -472,7 +481,43 @@ class CDSCOSearchStrategy implements SearchStrategy {
           });
 
           const regulatoryAuthority =
-            getRegulatoryAuthorityForCountry(filledComponents.country) || options.market || 'cdsco';
+            options.market === 'fda' ? 'fda' : getRegulatoryAuthorityForCountry(filledComponents.country);
+
+          if (!regulatoryAuthority) {
+            const messageText = `We do not currently serve ${filledComponents.country} yet. We are indexing this market soon and will notify you once it is available.`;
+            options.dataStream?.write({
+              type: 'data-appendMessage',
+              data: JSON.stringify({
+                id: `no-data-${Date.now()}-${index}`,
+                role: 'assistant',
+                metadata: null,
+                parts: [
+                  {
+                    type: 'text',
+                    text: messageText,
+                  },
+                ],
+                createdAt: new Date().toISOString(),
+              }),
+              transient: true,
+            });
+
+            options.dataStream?.write({
+              type: 'data-query_completion',
+              data: {
+                query,
+                index,
+                total: limitedQueries.length,
+                status: 'error',
+                resultsCount: 0,
+                imagesCount: 0,
+              },
+            });
+            console.warn(
+              `Skipping regulatory search for "${query}" because ${filledComponents.country} is not yet supported.`,
+            );
+            return { query, results: [], images: [] };
+          }
 
           const response = await fetch(`${this.apiUrl}/regsearch`, {
             method: 'POST',
@@ -481,10 +526,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
             },
             body: JSON.stringify({ 
               query: reformulatedQuery,
-              market: regulatoryAuthority,
-              country: filledComponents.country,
-              topics: filledComponents.topic,
-              productCategories: filledComponents.productCategory,
+              market: regulatoryAuthority
             }),
           });
 
@@ -574,7 +616,7 @@ class TavilySearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: 'regulatory' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -693,7 +735,7 @@ class FirecrawlSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: 'regulatory' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -826,7 +868,7 @@ class ExaSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'cdsco' | 'fda';
+      market?: 'regulatory' | 'fda';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -931,7 +973,7 @@ class ExaSearchStrategy implements SearchStrategy {
 
 // Search provider factory - Regulatory Search for ROW markets only
 const createSearchStrategy = (
-  provider: 'cdsco',
+  provider: 'regulatory',
   clients: {
     fastapi?: string;
   },
@@ -942,30 +984,17 @@ const createSearchStrategy = (
 
 export function webSearchTool(
   dataStream?: UIMessageStreamWriter<ChatMessage> | undefined,
-  searchProvider: 'cdsco' = 'cdsco',
+  searchProvider: 'regulatory' = 'regulatory',
 ) {
   return tool({
-    description: `This is a regulatory search tool for searching drug regulatory data across ROW (Rest of World) markets. Use this tool to search for drug approvals, pharmaceutical regulations, medical device registrations, and regulatory information across multiple markets.
-    Very important Rules:
-    - The queries should always be in the same language as the user's message.
-    - And count of the queries should be 3-5.
-    - Do not use the best quality unless absolutly required since it is time expensive.
-    - ⚠️ CRITICAL: ALWAYS include date/time context in search queries:
-      - For current events: "latest", "${new Date().getFullYear()}", "today", "current", "recent"
-      - For historical info: specific years or date ranges
-      - For time-sensitive topics: "newest", "updated", "${new Date().getFullYear()}"
-      - **NO TEMPORAL ASSUMPTIONS**: Never assume time periods - always be explicit about dates/years
-      - Examples: "latest drug approvals ${new Date().getFullYear()}", "current regulatory status", "recent pharmaceutical regulations in ${new Date().getFullYear()}"
-    
-    ### Market Selection for Regulatory Searches (ROW Markets):
-    - **Use 'fda' market**: For US-based queries, FDA regulations, US pharmaceutical companies, FDA-approved drugs, US medical devices
-    - **Use 'cdsco' market**: For ROW (Rest of World) market queries including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. This includes CDSCO regulations, pharmaceutical companies, drug approvals, and medical devices in ROW markets
-    - **Decision logic**:
-      - If user mentions "US", "FDA", "American", "US-based" → use 'fda'
-      - If user mentions any ROW market (India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, etc.) or "ROW", "Rest of World" → use 'cdsco'
-      - If no market specified → default to 'cdsco' (ROW markets)
-    - **Context matters**: The market parameter selects which regulatory database to search (FDA for US, ROW regulatory databases for Rest of World markets)
-    `,
+    description: `Use this regulatory intelligence search tool to retrieve authoritative documentation for life-science products across supported global markets.
+
+Critical guidance:
+- Always craft 3–5 focused queries in the user's language.
+- Each query should reference the product category, regulatory topic, and country/market whenever supplied or strongly implied.
+- Embed temporal context (e.g., "${new Date().getFullYear()}", "latest", specific date ranges) to reflect current requirements.
+- Default to market="cdsco" for ROW jurisdictions (India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and related authorities). Use market="fda" only for U.S. FDA matters.
+- Never fabricate results. If evidence is thin, return what is available and note the limitation.`,
     inputSchema: z.object({
       queries: z.array(
         z.string().describe('Array of 3-5 search queries to look up on the web. Default is 5. Minimum is 3.'),
@@ -991,7 +1020,7 @@ export function webSearchTool(
             'Array of quality levels for the search. Default is default. Other option is best. DO NOT use best unless necessary.',
           ),
       ).optional(),
-      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for ROW (Rest of World) markets regulatory information including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Defaults to "cdsco" (ROW markets) if not specified.'),
+      market: z.enum(['regulatory', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for ROW (Rest of World) markets regulatory information including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Defaults to "cdsco" (ROW markets) if not specified.'),
     }),
     execute: async ({
       queries,
@@ -1004,7 +1033,7 @@ export function webSearchTool(
       maxResults?: (number | undefined)[];
       topics?: ('general' | 'news' | undefined)[];
       quality?: ('default' | 'best' | undefined)[];
-      market?: 'fda' | 'cdsco';
+      market?: 'fda' | 'regulatory';
     }) => {
       // Initialize Regulatory Search (ROW markets) client only - all other providers are inactive
       const clients = {
@@ -1033,7 +1062,7 @@ export function webSearchTool(
         maxResults: maxResults as number[],
         topics: topics as ('general' | 'news')[],
         quality: quality as ('default' | 'best')[],
-        market: market || 'cdsco',
+        market: market || 'regulatory',
         dataStream,
       });
     },

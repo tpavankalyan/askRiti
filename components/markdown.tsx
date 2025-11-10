@@ -743,7 +743,35 @@ LinkPreview.displayName = 'LinkPreview';
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content, isUserMessage = false }) => {
   const { processedContent, citations: extractedCitations, latexBlocks, isProcessing } = useProcessedContent(content);
-  const citationLinks = extractedCitations;
+
+  const citationList = useMemo(() => {
+    const seen = new Set<string>();
+    return extractedCitations
+      .map((citation) => {
+        const link = citation.link?.trim();
+        if (!link) {
+          return null;
+        }
+        const text = citation.text?.trim() || link;
+        return { text, link };
+      })
+      .filter((citation): citation is CitationLink => {
+        if (!citation) return false;
+        if (seen.has(citation.link)) {
+          return false;
+        }
+        seen.add(citation.link);
+        return true;
+      });
+  }, [extractedCitations]);
+
+  const citationMap = useMemo(() => {
+    const map = new Map<string, { index: number; text: string }>();
+    citationList.forEach((citation, index) => {
+      map.set(citation.link, { index, text: citation.text });
+    });
+    return map;
+  }, [citationList]);
 
   // Optimized element key generation using content hash instead of indices
   const contentHash = useMemo(() => {
@@ -794,9 +822,10 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content,
               target="_blank"
               className={
                 isCitation
-                  ? 'cursor-pointer text-xs no-underline text-primary py-0.5 px-1.25 m-0! bg-primary/10 rounded-sm font-medium inline-flex items-center -translate-y-[1px] leading-none hover:bg-primary/20 focus:outline-none focus:ring-1 focus:ring-primary align-baseline'
+                  ? 'cursor-pointer no-underline font-semibold text-primary hover:text-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-[0.2rem] px-0.5 leading-tight'
                   : 'text-primary bg-primary/10 no-underline hover:underline font-medium'
               }
+              aria-label={isCitation ? title || href : undefined}
             >
               {text}
             </Link>
@@ -818,9 +847,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content,
   const renderCitation = useCallback(
     (index: number, citationText: string, href: string, key: string) => {
       return (
-        <span className="inline-flex items-baseline relative whitespace-normal" key={key}>
-          {renderHoverCard(href, index + 1, true, citationText)}
-        </span>
+        <sup key={key} className="mx-0.5 align-super text-[0.75rem] font-semibold text-primary">
+          {renderHoverCard(href, `[${index + 1}]`, true, citationText)}
+        </sup>
       );
     },
     [renderHoverCard],
@@ -969,6 +998,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content,
         }
 
         const linkText = typeof text === 'string' ? text : href;
+        const citationEntry = !isUserMessage ? citationMap.get(href) : undefined;
 
         // For user messages, keep raw text to avoid accidental linkification changes
         if (isUserMessage) {
@@ -986,20 +1016,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content,
           );
         }
 
+        if (citationEntry) {
+          return renderCitation(citationEntry.index, citationEntry.text, href, key);
+        }
+
         // If there's descriptive link text, render a normal anchor with hover preview.
         // This preserves full text inside tables and prevents truncation to citation chips.
         if (linkText && linkText !== href) {
           return renderHoverCard(href, linkText, false);
         }
 
-        // For bare URLs, render as citation chips
-        let citationIndex = citationLinks.findIndex((link) => link.link === href);
-        if (citationIndex === -1) {
-          citationLinks.push({ text: href, link: href });
-          citationIndex = citationLinks.length - 1;
-        }
-        const citationText = citationLinks[citationIndex].text;
-        return renderCitation(citationIndex, citationText, href, key);
+        return renderHoverCard(href, href, false);
       },
       heading(children, level) {
         const key = getElementKey('heading', String(children));
@@ -1119,7 +1146,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content,
         );
       },
     }),
-    [latexBlocks, isUserMessage, renderCitation, renderHoverCard, getElementKey, citationLinks],
+    [latexBlocks, isUserMessage, renderCitation, renderHoverCard, getElementKey, citationMap],
   );
 
   // Show a progressive loading state for large content
@@ -1146,6 +1173,38 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({ content,
   return (
     <div className="markdown-body prose prose-neutral dark:prose-invert max-w-none text-foreground font-sans">
       <Marked renderer={renderer}>{processedContent}</Marked>
+      {citationList.length > 0 && (
+        <aside className="not-prose mt-6 border-t border-border/60 pt-4 space-y-3">
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">Sources</p>
+          <ol className="list-decimal pl-5 space-y-3 text-sm text-foreground/90 marker:text-primary/80">
+            {citationList.map((citation, index) => {
+              const displayText =
+                citation.text.length > 160 ? `${citation.text.slice(0, 157)}…` : citation.text;
+              let domain = '';
+              try {
+                domain = new URL(citation.link).hostname;
+              } catch {
+                domain = '';
+              }
+
+              return (
+                <li key={`${citation.link}-${index}`} className="space-y-1">
+                  <Link
+                    href={citation.link}
+                    target="_blank"
+                    className="font-medium text-primary hover:underline break-words"
+                  >
+                    {displayText}
+                  </Link>
+                  <span className="block text-xs text-muted-foreground break-words">
+                    {domain ? domain : citation.link}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </aside>
+      )}
     </div>
   );
 }, (prevProps, nextProps) => {

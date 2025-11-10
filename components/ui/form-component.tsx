@@ -103,9 +103,21 @@ const ModelSwitcher: React.FC<ModelSwitcherProps> = React.memo(
 
     // Fetch country code on mount
     useEffect(() => {
-      getUserCountryCode().then((code) => {
-        setCountryCode(code);
-      });
+      let isMounted = true;
+
+      getUserCountryCode()
+        .then((code) => {
+          if (isMounted) {
+            setCountryCode(code);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch user country code:', error);
+        });
+
+      return () => {
+        isMounted = false;
+      };
     }, []);
 
     const availableModels = useMemo(() => getFilteredModels(countryCode || undefined), [countryCode]);
@@ -3616,8 +3628,8 @@ const FormComponent: React.FC<FormComponentProps> = ({
                       : isTypewriting
                         ? '✨ Writing enhanced prompt...'
                         : hasInteracted
-                          ? 'Ask a new question...'
-                          : 'Ask a question...'
+                          ? 'Ask about a drug, a topic, and a region.'
+                          : 'Ask about a drug, a topic, and a region.'
                   }
                   value={input}
                   onChange={handleInput}
