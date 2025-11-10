@@ -199,13 +199,13 @@ const CdscoIcon = ({ className }: { className?: string }) => (
   />
 );
 
-// COMMENTED OUT - Search provider options restricted to CDSCO only per requirements
+// COMMENTED OUT - Search provider options restricted to Regulatory Search (ROW markets) only per requirements
 // Search Provider Options
 const searchProviders = [
   {
     value: 'cdsco',
-    label: 'CDSCO',
-    description: 'Parallel-like web search (no images).',
+    label: 'Regulatory Search',
+    description: 'Search regulatory data for drugs across ROW (Rest of World) markets.',
     icon: CdscoIcon,
     default: true,
   },
@@ -301,7 +301,7 @@ export function PreferencesSection({
   setIsCustomInstructionsEnabled?: (value: boolean | ((val: boolean) => boolean)) => void;
 }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
-const [searchProvider, setSearchProvider] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco'>(
+const [searchProvider, setSearchProvider] = useLocalStorage<'cdsco'>(
     'scira-search-provider',
     'cdsco',
   );
@@ -336,20 +336,10 @@ const [searchProvider, setSearchProvider] = useLocalStorage<'exa' | 'parallel' |
   const enabled = isCustomInstructionsEnabled ?? true;
   const setEnabled = setIsCustomInstructionsEnabled ?? (() => { });
 
-const handleSearchProviderChange = (newProvider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco') => {
+// Regulatory Search only - handler kept for compatibility but only accepts 'cdsco'
+const handleSearchProviderChange = (newProvider: 'cdsco') => {
     setSearchProvider(newProvider);
-    toast.success(
-      `Search provider changed to ${newProvider === 'exa'
-        ? 'Exa'
-        : newProvider === 'parallel'
-          ? 'Parallel AI'
-          : newProvider === 'tavily'
-            ? 'Tavily'
-            : newProvider === 'firecrawl'
-              ? 'Firecrawl'
-              : 'CDSCO'
-      }`,
-    );
+    toast.success('Search provider changed to Regulatory Search');
   };
 
   // Custom Instructions queries and handlers

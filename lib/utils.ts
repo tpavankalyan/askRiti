@@ -34,21 +34,16 @@ export type SearchGroupId =
   | 'crypto'
   | 'code';
 
-// Search provider information for dynamic descriptions
+// Search provider information for dynamic descriptions - Regulatory Search for ROW markets
 export const searchProviderInfo = {
-  cdsco: 'CDSCO',
-  parallel: 'Parallel AI',
-  exa: 'Exa',
-  tavily: 'Tavily',
-  firecrawl: 'Firecrawl',
+  cdsco: 'Regulatory Search',
 } as const;
 
-export type SearchProvider = keyof typeof searchProviderInfo;
+export type SearchProvider = 'cdsco';
 
 // Function to get dynamic web search description based on selected provider
 export function getWebSearchDescription(provider: SearchProvider = 'cdsco'): string {
-  const providerName = searchProviderInfo[provider];
-  return `Search across the entire internet powered by ${providerName}`;
+  return `Search regulatory data for drugs across ROW (Rest of World) markets`;
 }
 
 // Function to get search groups with dynamic descriptions
@@ -104,7 +99,7 @@ export function getSearchGroups(searchProvider: SearchProvider = 'cdsco') {
       name: 'Academic',
       description: 'Search academic papers powered by Exa',
       icon: MicroscopeIcon,
-      show: true,
+      show: false, // Inactive - only Web mode is active
     },
     {
       id: 'extreme' as const,

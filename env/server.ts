@@ -10,6 +10,9 @@ export const serverEnv = createEnv({
     ANTHROPIC_API_KEY: z.string().optional(),
     GROQ_API_KEY: z.string().optional(),
     GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
+    AZURE_RESOURCE_NAME: z.string().optional(),
+    AZURE_API_KEY: z.string().optional(),
+    AZURE_BASE_URL: z.string().optional(),
     
     // Development & Sandbox
     DAYTONA_API_KEY: z.string().optional().default('dev-key'),

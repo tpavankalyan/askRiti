@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "2.0.33",
+    "@ai-sdk/azure": "^2.0.66",
     "@ai-sdk/cohere": "^2.0.14",
     "@ai-sdk/elevenlabs": "1.0.14",
     "@ai-sdk/gateway": "2.0.0",

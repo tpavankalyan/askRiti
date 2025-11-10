@@ -100,7 +100,7 @@ const ChatInterface = memo(
       false,
     );
 
-const [searchProvider, _] = useLocalStorage<'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco'>(
+const [searchProvider, _] = useLocalStorage<'cdsco'>(
       'ritivel-search-provider',
       'cdsco',
     );

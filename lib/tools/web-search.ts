@@ -244,7 +244,7 @@ class ParallelSearchStrategy implements SearchStrategy {
   }
 }
 
-// CDSCO search strategy (using FastAPI server)
+// Regulatory search strategy for ROW markets (using FastAPI server)
 class CDSCOSearchStrategy implements SearchStrategy {
   constructor(private apiUrl: string) { }
 
@@ -259,7 +259,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
     },
   ) {
     const limitedQueries = queries.slice(0, 5);
-    console.log('Using CDSCO (FastAPI) batch processing for queries:', limitedQueries);
+    console.log('Using Regulatory Search (ROW markets - FastAPI) batch processing for queries:', limitedQueries);
 
     // Start notifications
     limitedQueries.forEach((query, index) => {
@@ -317,7 +317,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
             },
           });
 
-          console.log('CDSCO results:', transformedResults);
+          console.log('Regulatory Search (ROW markets) results:', transformedResults);
 
           return {
             query,
@@ -325,7 +325,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
             images: [],
           };
         } catch (error) {
-          console.error(`CDSCO search error for query "${query}":`, error);
+          console.error(`Regulatory Search (ROW markets) error for query "${query}":`, error);
           options.dataStream?.write({
             type: 'data-query_completion',
             data: {
@@ -344,7 +344,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
       const searchResults = await Promise.all(perQueryPromises);
       return { searches: searchResults };
     } catch (error) {
-      console.error('CDSCO batch orchestration error:', error);
+      console.error('Regulatory Search (ROW markets) batch orchestration error:', error);
       limitedQueries.forEach((query, index) => {
         options.dataStream?.write({
           type: 'data-query_completion',
@@ -731,36 +731,24 @@ class ExaSearchStrategy implements SearchStrategy {
   }
 }
 
-// Search provider factory
+// Search provider factory - Regulatory Search for ROW markets only
 const createSearchStrategy = (
-  provider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco',
+  provider: 'cdsco',
   clients: {
-    exa: Exa;
-    parallel: Parallel;
-    firecrawl: FirecrawlApp;
-    tvly: TavilyClient;
     fastapi?: string;
   },
 ): SearchStrategy => {
-  const strategies: Record<string, () => SearchStrategy> = {
-    cdsco: () => new CDSCOSearchStrategy(clients.fastapi || 'https://askriti-fastapi-195347899917.us-central1.run.app'),
-    parallel: () => new ParallelSearchStrategy(clients.parallel, clients.firecrawl),
-    tavily: () => new TavilySearchStrategy(clients.tvly),
-    firecrawl: () => new FirecrawlSearchStrategy(clients.firecrawl),
-    exa: () => new ExaSearchStrategy(clients.exa),
-  };
-
-  return strategies[provider]();
+  // Only Regulatory Search (ROW markets) strategy is active - all other providers are inactive
+  return new CDSCOSearchStrategy(clients.fastapi || 'https://askriti-fastapi-195347899917.us-central1.run.app');
 };
 
 export function webSearchTool(
   dataStream?: UIMessageStreamWriter<ChatMessage> | undefined,
-  searchProvider: 'exa' | 'parallel' | 'tavily' | 'firecrawl' | 'cdsco' = 'cdsco',
+  searchProvider: 'cdsco' = 'cdsco',
 ) {
   return tool({
-    description: `This is the default tool of the app to be used to search the web for information with multiple queries, max results, search depth, topics, and quality.
+    description: `This is a regulatory search tool for searching drug regulatory data across ROW (Rest of World) markets. Use this tool to search for drug approvals, pharmaceutical regulations, medical device registrations, and regulatory information across multiple markets.
     Very important Rules:
-    ...${searchProvider === "parallel" ? "The First Query should be the objective and the rest of the queries should be related to the objective" : ""}...
     - The queries should always be in the same language as the user's message.
     - And count of the queries should be 3-5.
     - Do not use the best quality unless absolutly required since it is time expensive.
@@ -769,16 +757,16 @@ export function webSearchTool(
       - For historical info: specific years or date ranges
       - For time-sensitive topics: "newest", "updated", "${new Date().getFullYear()}"
       - **NO TEMPORAL ASSUMPTIONS**: Never assume time periods - always be explicit about dates/years
-      - Examples: "latest AI news ${new Date().getFullYear()}", "current stock prices today", "recent developments in ${new Date().getFullYear()}"
+      - Examples: "latest drug approvals ${new Date().getFullYear()}", "current regulatory status", "recent pharmaceutical regulations in ${new Date().getFullYear()}"
     
-    ### Market Selection for Regulatory Searches (CDSCO vs FDA):
+    ### Market Selection for Regulatory Searches (ROW Markets):
     - **Use 'fda' market**: For US-based queries, FDA regulations, US pharmaceutical companies, FDA-approved drugs, US medical devices
-    - **Use 'cdsco' market**: For India-based queries, CDSCO regulations, Indian pharmaceutical companies, India drug approvals, Indian medical devices
+    - **Use 'cdsco' market**: For ROW (Rest of World) market queries including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. This includes CDSCO regulations, pharmaceutical companies, drug approvals, and medical devices in ROW markets
     - **Decision logic**:
-      - If user mentions "India", "CDSCO", "Indian", "India-based" → use 'cdsco'
       - If user mentions "US", "FDA", "American", "US-based" → use 'fda'
-      - If no market specified → default to 'cdsco'
-    - **Context matters**: The market parameter selects which regulatory database to search (CDSCO for India, FDA for US)
+      - If user mentions any ROW market (India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, etc.) or "ROW", "Rest of World" → use 'cdsco'
+      - If no market specified → default to 'cdsco' (ROW markets)
+    - **Context matters**: The market parameter selects which regulatory database to search (FDA for US, ROW regulatory databases for Rest of World markets)
     `,
     inputSchema: z.object({
       queries: z.array(
@@ -805,7 +793,7 @@ export function webSearchTool(
             'Array of quality levels for the search. Default is default. Other option is best. DO NOT use best unless necessary.',
           ),
       ).optional(),
-      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for India/CDSCO regulatory information. Defaults to "cdsco" if not specified.'),
+      market: z.enum(['cdsco', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for ROW (Rest of World) markets regulatory information including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Defaults to "cdsco" (ROW markets) if not specified.'),
     }),
     execute: async ({
       queries,
@@ -820,12 +808,8 @@ export function webSearchTool(
       quality?: ('default' | 'best' | undefined)[];
       market?: 'fda' | 'cdsco';
     }) => {
-// Initialize all clients
+      // Initialize Regulatory Search (ROW markets) client only - all other providers are inactive
       const clients = {
-        exa: new Exa(serverEnv.EXA_API_KEY),
-        parallel: new Parallel({ apiKey: serverEnv.PARALLEL_API_KEY }),
-        firecrawl: new FirecrawlApp({ apiKey: serverEnv.FIRECRAWL_API_KEY }),
-        tvly: tavily({ apiKey: serverEnv.TAVILY_API_KEY }),
         fastapi: serverEnv.FASTAPI_URL || 'https://askriti-fastapi-195347899917.us-central1.run.app',
       };
 

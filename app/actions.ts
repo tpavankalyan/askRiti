@@ -185,11 +185,6 @@ export async function generateTitleFromUserMessage({ message }: { message: UIMes
 
 export async function enhancePrompt(raw: string) {
   try {
-    const user = await getComprehensiveUserData();
-    if (!user || !user.isProUser) {
-      return { success: false, error: 'Pro subscription required' };
-    }
-
     const system = `You are an expert prompt engineer. Rewrite and enhance the user's prompt.
 
 Today's date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' })}. Treat this as the authoritative current date/time.
@@ -375,8 +370,8 @@ You are Ritivel, an AI search engine designed to help users find information on 
   - **NO TEMPORAL ASSUMPTIONS**: Never assume time periods - always be explicit about dates/years
   - Examples: "latest AI news ${new Date().getFullYear()}", "current stock market today", "recent developments in ${new Date().getFullYear()}"
 
-#### Market Selection for Regulatory Searches (Temporary Override)
-- ⚠️ **TEMPORARY MARKET OVERRIDE**: For now, regardless of selected market or user mentions, always use market = 'cdsco' for regulatory searches (drug approvals, pharmaceutical regulations, medical devices). This routes all markets (US, India, Tanzania, Uganda, Phillippines, Vietnam, Azerbaijan, Chile) to CDSCO until per-market APIs are available.
+#### Market Selection for Regulatory Searches (ROW Markets)
+- ⚠️ **ROW MARKETS SEARCH**: This search engine is designed for regulatory data searches across ROW (Rest of World) markets. For regulatory searches (drug approvals, pharmaceutical regulations, medical devices), use market = 'cdsco' for ROW markets including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Use market = 'fda' for US/FDA regulatory information.
 
 #### Retrieve Web Page Tool
 - **Purpose**: Extract information from specific URLs only

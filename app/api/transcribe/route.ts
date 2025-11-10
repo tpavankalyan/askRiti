@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { elevenlabs } from '@ai-sdk/elevenlabs';
-import { groq } from '@ai-sdk/groq';
+import { createAzure } from '@ai-sdk/azure';
 import { experimental_transcribe as transcribe } from 'ai';
+import { serverEnv } from '@/env/server';
+
+// Create Azure instance with deployment-based URLs for cognitiveservices.azure.com endpoint
+// baseURL must include /openai path for cognitiveservices.azure.com endpoints
+const azure = createAzure({
+  baseURL: serverEnv.AZURE_BASE_URL || 'https://pavan-mhsly2gi-eastus2.cognitiveservices.azure.com/openai',
+  apiKey: serverEnv.AZURE_API_KEY,
+  apiVersion: '2025-03-01-preview',
+  useDeploymentBasedUrls: true, // Required for deployment-based URL format
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await transcribe({
-      model: groq.transcription('whisper-large-v3'),
+      model: azure.transcription('gpt-4o-transcribe'),
       audio: await audio.arrayBuffer(),
     });
 

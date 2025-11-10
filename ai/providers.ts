@@ -43,7 +43,7 @@ export const ritivel = customProvider({
     'ritivel-grok-4-fast': xai('grok-4-fast-non-reasoning'),
     'ritivel-grok-4-fast-think': xai('grok-4-fast'),
     'ritivel-code': xai('grok-code-fast-1'),
-    'ritivel-enhance': groq('moonshotai/kimi-k2-instruct-0905'),
+    'ritivel-enhance': openai('gpt-4.1-mini'),
     'ritivel-follow-up': xai('grok-4-fast-non-reasoning'),
     'ritivel-qwen-4b': huggingface.chat('Qwen/Qwen3-4B-Instruct-2507:nscale'),
     'ritivel-qwen-4b-thinking': wrapLanguageModel({

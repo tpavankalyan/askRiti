@@ -2517,11 +2517,6 @@ const FormComponent: React.FC<FormComponentProps> = ({
   );
 
   const handleEnhance = useCallback(async () => {
-    if (!isProUser) {
-      fetchDiscountConfigForm();
-      setShowUpgradeDialog(true);
-      return;
-    }
     if (!input || input.trim().length === 0) {
       toast.error('Please enter a prompt to enhance');
       return;
@@ -2557,13 +2552,10 @@ const FormComponent: React.FC<FormComponentProps> = ({
   }, [
     input,
     isProcessing,
-    isProUser,
     setInput,
     inputRef,
     typewriterText,
     isEnhancing,
-    setShowUpgradeDialog,
-    fetchDiscountConfigForm,
   ]);
 
   const handleRecord = useCallback(async () => {
@@ -2572,12 +2564,6 @@ const FormComponent: React.FC<FormComponentProps> = ({
       cleanupMediaRecorder();
     } else {
       try {
-        // Check if user is signed in
-        if (!user) {
-          setShowSignInDialog(true);
-          return;
-        }
-
         // Environment and feature checks
         if (typeof window === 'undefined') {
           toast.error('Voice recording is only available in the browser.');
@@ -2686,7 +2672,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
         setIsRecording(false);
       }
     }
-  }, [isRecording, cleanupMediaRecorder, setInput, user, setShowSignInDialog]);
+  }, [isRecording, cleanupMediaRecorder, setInput]);
 
   const handleInput = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -3850,9 +3836,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
                               ? 'Using AI to improve your prompt'
                               : isTypewriting
                                 ? 'Typing enhanced prompt'
-                                : isProUser
-                                  ? 'Enhance your prompt with AI'
-                                  : 'Enhance your prompt with AI (Pro feature)'}
+                                : 'Enhance your prompt with AI'}
                           </span>
                         </div>
                       </TooltipContent>

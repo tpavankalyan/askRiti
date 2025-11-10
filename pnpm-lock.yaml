@@ -11,6 +11,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: 2.0.33
         version: 2.0.33(zod@4.1.8)
+      '@ai-sdk/azure':
+        specifier: ^2.0.66
+        version: 2.0.66(zod@4.1.8)
       '@ai-sdk/cohere':
         specifier: ^2.0.14
         version: 2.0.14(zod@4.1.8)
@@ -477,6 +480,12 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/azure@2.0.66':
+    resolution: {integrity: sha512-B/TXYbHKD0Inlhn9ezmCTzPIi22yvjBrT0EKOi8ma6IX9ihFKFEFvOnE+GkqD3PvEgcjhw2zs2XtbQLtmiesyg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/cohere@2.0.14':
     resolution: {integrity: sha512-IsYhu8uJIRnjz/OQNd+9LS9ROD2bNMLuizFoLYfSv+J8gmdm0dcHxdTHNEacrs6VYl0jutq6dfRgCb4CKLAqBw==}
     engines: {node: '>=18'}
@@ -537,8 +546,20 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/openai@2.0.64':
+    resolution: {integrity: sha512-+1mqxn42uB32DPZ6kurSyGAmL3MgCaDpkYU7zNDWI4NLy3Zg97RxTsI1jBCGIqkEVvRZKJlIMYtb89OvMnq3AQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider-utils@3.0.12':
     resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@3.0.16':
+    resolution: {integrity: sha512-lsWQY9aDXHitw7C1QRYIbVGmgwyT98TF3MfM8alNIXKpdJdi+W782Rzd9f1RyOfgRmZ08gJ2EYNDhWNK7RqpEA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3981,6 +4002,10 @@ packages:
     resolution: {integrity: sha512-bSRG85ZrMdmWtm7qkF9He9TNRzc/Bm99gEJMaQoHJ9E6Kv9QBbsldh2oMj7iXmYNEAVvNgvv5vPorG6W+XtBhQ==}
     engines: {node: '>=20.0.0'}
 
+  eventsource-parser@3.0.6:
+    resolution: {integrity: sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==}
+    engines: {node: '>=18.0.0'}
+
   exa-js@1.10.2:
     resolution: {integrity: sha512-nObBipoXKL5uL6Dc8Q3c9GA4xEfunQMdGGqtcCkQSNilzR6AExyVkBxTdpWqC20jKa3/dvXu6otXQLaRyZNqGw==}
 
@@ -6200,6 +6225,13 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.12(zod@4.1.8)
       zod: 4.1.8
 
+  '@ai-sdk/azure@2.0.66(zod@4.1.8)':
+    dependencies:
+      '@ai-sdk/openai': 2.0.64(zod@4.1.8)
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.8)
+      zod: 4.1.8
+
   '@ai-sdk/cohere@2.0.14(zod@4.1.8)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
@@ -6268,11 +6300,24 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.12(zod@4.1.8)
       zod: 4.1.8
 
+  '@ai-sdk/openai@2.0.64(zod@4.1.8)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.16(zod@4.1.8)
+      zod: 4.1.8
+
   '@ai-sdk/provider-utils@3.0.12(zod@4.1.8)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.5
+      zod: 4.1.8
+
+  '@ai-sdk/provider-utils@3.0.16(zod@4.1.8)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.6
       zod: 4.1.8
 
   '@ai-sdk/provider@2.0.0':
@@ -10187,6 +10232,8 @@ snapshots:
   events@3.3.0: {}
 
   eventsource-parser@3.0.5: {}
+
+  eventsource-parser@3.0.6: {}
 
   exa-js@1.10.2(encoding@0.1.13)(ws@8.18.3):
     dependencies:

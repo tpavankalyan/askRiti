@@ -116,9 +116,12 @@ export async function POST(req: Request) {
     id,
     selectedVisibilityType,
     isCustomInstructionsEnabled,
-    searchProvider,
+    searchProvider: _searchProvider, // Ignore incoming value - force Regulatory Search (ROW markets) only
     selectedConnectors,
   } = await req.json();
+  
+  // Force Regulatory Search (ROW markets) only - all other providers are inactive
+  const searchProvider: 'cdsco' = 'cdsco';
   const { latitude, longitude } = geolocation(req);
   const streamId = 'stream-' + uuidv7();
 
