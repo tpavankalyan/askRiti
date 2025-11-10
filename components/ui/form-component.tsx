@@ -3342,10 +3342,6 @@ const FormComponent: React.FC<FormComponentProps> = ({
               type: 'text',
               text: input,
             },
-            {
-              type: 'text',
-              text: `MARKET: ${market || 'India'}`,
-            },
           ],
         });
 
