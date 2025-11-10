@@ -228,7 +228,7 @@ interface SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'fda' | 'regulatory';
+      market?: 'fda' | 'regulatory' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ): Promise<{ searches: Array<{ query: string; results: any[]; images: any[] }> }>;
@@ -247,7 +247,7 @@ class ParallelSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'fda' | 'regulatory';
+      market?: 'fda' | 'regulatory' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -386,7 +386,7 @@ class CDSCOSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'regulatory' | 'fda';
+      market?: 'regulatory' | 'fda' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -616,7 +616,7 @@ class TavilySearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'regulatory' | 'fda';
+      market?: 'regulatory' | 'fda' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -735,7 +735,7 @@ class FirecrawlSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'regulatory' | 'fda';
+      market?: 'regulatory' | 'fda' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -868,7 +868,7 @@ class ExaSearchStrategy implements SearchStrategy {
       maxResults: number[];
       topics: ('general' | 'news')[];
       quality: ('default' | 'best')[];
-      market?: 'regulatory' | 'fda';
+      market?: 'regulatory' | 'fda' | 'cdsco';
       dataStream?: UIMessageStreamWriter<ChatMessage>;
     },
   ) {
@@ -973,7 +973,7 @@ class ExaSearchStrategy implements SearchStrategy {
 
 // Search provider factory - Regulatory Search for ROW markets only
 const createSearchStrategy = (
-  provider: 'regulatory',
+  provider: 'regulatory' | 'cdsco',
   clients: {
     fastapi?: string;
   },
@@ -984,7 +984,7 @@ const createSearchStrategy = (
 
 export function webSearchTool(
   dataStream?: UIMessageStreamWriter<ChatMessage> | undefined,
-  searchProvider: 'regulatory' = 'regulatory',
+  searchProvider: 'regulatory' | 'cdsco' = 'cdsco',
 ) {
   return tool({
     description: `Use this regulatory intelligence search tool to retrieve authoritative documentation for life-science products across supported global markets.
@@ -1020,7 +1020,12 @@ Critical guidance:
             'Array of quality levels for the search. Default is default. Other option is best. DO NOT use best unless necessary.',
           ),
       ).optional(),
-      market: z.enum(['regulatory', 'fda']).optional().describe('Market to search in: "fda" for US/FDA regulatory information, "cdsco" for ROW (Rest of World) markets regulatory information including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Defaults to "cdsco" (ROW markets) if not specified.'),
+      market: z
+        .enum(['regulatory', 'cdsco', 'fda'])
+        .optional()
+        .describe(
+          'Market to search in: "fda" for US/FDA regulatory information, "cdsco" (or "regulatory") for ROW (Rest of World) markets regulatory information including India, Tanzania, Uganda, Philippines, Vietnam, Azerbaijan, Chile, and other ROW markets. Defaults to "cdsco" (ROW markets) if not specified.',
+        ),
     }),
     execute: async ({
       queries,
@@ -1033,7 +1038,7 @@ Critical guidance:
       maxResults?: (number | undefined)[];
       topics?: ('general' | 'news' | undefined)[];
       quality?: ('default' | 'best' | undefined)[];
-      market?: 'fda' | 'regulatory';
+      market?: 'fda' | 'regulatory' | 'cdsco';
     }) => {
       // Initialize Regulatory Search (ROW markets) client only - all other providers are inactive
       const clients = {
@@ -1062,7 +1067,7 @@ Critical guidance:
         maxResults: maxResults as number[],
         topics: topics as ('general' | 'news')[],
         quality: quality as ('default' | 'best')[],
-        market: market || 'regulatory',
+        market: (market === 'regulatory' ? 'cdsco' : market) || 'cdsco',
         dataStream,
       });
     },

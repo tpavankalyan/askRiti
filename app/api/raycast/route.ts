@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     toolChoice: 'auto',
     experimental_activeTools: activeTools,
     tools: {
-      web_search: webSearchTool(undefined, "cdsco"),
+      web_search: webSearchTool(undefined, 'regulatory'),
       x_search: xSearchTool,
     },
   });

@@ -37,17 +37,21 @@ export type SearchGroupId =
 // Search provider information for dynamic descriptions - Regulatory Search for ROW markets
 export const searchProviderInfo = {
   regulatory: 'Regulatory Search',
+  cdsco: 'CDSCO Regulatory Search',
 } as const;
 
-export type SearchProvider = 'regulatory';
+export type SearchProvider = keyof typeof searchProviderInfo;
 
 // Function to get dynamic web search description based on selected provider
-export function getWebSearchDescription(provider: SearchProvider = 'regulatory'): string {
-  return `Search regulatory data for drugs across ROW (Rest of World) markets`;
+export function getWebSearchDescription(provider: SearchProvider = 'cdsco'): string {
+  if (provider === 'regulatory') {
+    return 'Search regulatory data for global life sciences markets';
+  }
+  return 'Search regulatory data for drugs across ROW (Rest of World) markets';
 }
 
 // Function to get search groups with dynamic descriptions
-export function getSearchGroups(searchProvider: SearchProvider = 'regulatory') {
+export function getSearchGroups(searchProvider: SearchProvider = 'cdsco') {
   return [
     {
       id: 'web' as const,

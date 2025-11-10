@@ -240,6 +240,14 @@ const groupTools = {
   buddy: ['datetime', 'search_memories', 'add_memory'] as const,
 } as const;
 
+function getInstructionsForGroup(id: LegacyGroupId) {
+  if (id === 'buddy') {
+    return groupInstructions.web;
+  }
+
+  return groupInstructions[id as keyof typeof groupInstructions];
+}
+
 const groupInstructions = {
   web: `
 # Ritivel Regulatory Intelligence Assistant
@@ -1161,7 +1169,7 @@ export async function getGroupConfig(groupId: LegacyGroupId = 'web') {
   }
 
   const tools = groupTools[groupId as keyof typeof groupTools];
-  const instructions = groupInstructions[(groupId === 'buddy' ? 'web' : groupId) as keyof typeof groupInstructions];
+  const instructions = getInstructionsForGroup(groupId);
 
   return {
     tools,
