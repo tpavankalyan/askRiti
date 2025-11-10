@@ -425,34 +425,8 @@ const UserProfile = memo(
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          // Unauthenticated user - show simple sign in button
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                className={cn(
-                  'h-7 px-2.5 text-xs rounded-md shadow-sm group',
-                  'hover:scale-[1.02] active:scale-[0.98] transition-transform',
-                  signingIn && 'animate-pulse',
-                  className,
-                )}
-                onClick={() => {
-                  setSigningIn(true);
-                  setSignInDialogOpen(true);
-                }}
-              >
-                <SignInIcon className="size-3.5 mr-1.5" />
-                <span>Sign in</span>
-                <span className="ml-1.5 hidden sm:inline text-[9px] px-1.5 py-0.5 rounded-full bg-primary-foreground/15 text-primary-foreground/90">
-                  Free
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={4}>
-              Sign in to save progress and sync across devices
-            </TooltipContent>
-          </Tooltip>
+          // Sign-in button temporarily hidden
+          null
         )}
 
         {/* Settings Dialog */}

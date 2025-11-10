@@ -219,25 +219,16 @@ async function extremeSearch(
         .min(1)
         .max(5),
     }),
-    prompt: `
-Plan out the research for the following topic: ${prompt}.
+    prompt: `Develop a high-stakes regulatory research plan for life-science compliance teams investigating: ${prompt}.
 
 Today's Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' })}
 
-Plan Guidelines:
-- Break down the topic into key aspects to research
-- Generate specific, diverse search queries for each aspect
-- Search for relevant information using the web search tool
-- Analyze the results and identify important facts and insights
-- The plan is limited to 15 actions, do not exceed this limit!
-- Follow up with more specific queries as you learn more
-- Add todos for code execution if it is asked for by the user
-- No need to synthesize your findings into a comprehensive response, just return the results
-- The plan should be concise and to the point, no more than 10 items
-- Keep the titles concise and to the point, no more than 70 characters
-- Mention if the topic needs to use the xSearch tool
-- Mention any need for visualizations in the plan
-- Make the plan technical and specific to the topic`,
+Planning directives:
+- Focus strictly on regulatory guidance, approvals, vigilance, labelling, renewals, or market entry rules for medicinal products, biologics, medical devices, or diagnostics.
+- Ensure each plan item captures or seeks the three critical details: product category, regulatory topic, and country/authority. Flag gaps explicitly so we can ask the user or target follow-up searches.
+- Limit the plan to 15 total actions (≤5 sections, each with 3–5 todos).
+- Identify which actions require X (Twitter) monitoring or code-driven analysis (e.g., tabulating timelines) when applicable.
+- Do not include narrative summaries—only actionable research todos.`,
   });
 
   console.log(result.plan);
@@ -266,78 +257,38 @@ Plan Guidelines:
     model: ritivel.languageModel('ritivel-default'),
     stopWhen: stepCountIs(totalTodos),
     system: `
-You are an autonomous deep research analyst. Your goal is to research the given research plan thoroughly with the given tools.
+You are an autonomous regulatory intelligence analyst serving life-sciences compliance teams. Investigate the research plan thoroughly using the available tools.
 
 Today's Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' })}.
 
-### PRIMARY FOCUS: SEARCH-DRIVEN RESEARCH (95% of your work)
-Your main job is to SEARCH extensively and gather comprehensive information. Search should be your go-to approach for almost everything.
-Make sure to be mindful of today's date and time and use it to your advantage when searching for information.
+### Primary mandate
+- Stay strictly within medicinal products, biologics, medical devices, diagnostics, and other life-science products.
+- Prioritise factual regulatory requirements; never speculate, offer opinions, or extrapolate beyond retrieved evidence.
+- Every action must reinforce or uncover the three critical details: (1) product category, (2) regulatory topic, (3) country/competent authority. When a detail is missing, focus searches or follow-up actions on closing that gap.
+- Respect the ${totalTodos} step budget (with up to 2 retries for errors). Treat each step as high-value.
 
-⚠️ IMP: Total Assistant function-call turns limit: at most ${totalTodos}! You must reach this limit strictly!
+### Searching discipline
+- Search before analysing. Run one query at a time, review results, then iterate.
+- Craft 3–5 targeted searches per research topic varying angle (baseline requirements, recent updates ${new Date().getFullYear()}, procedural guidance, enforcement actions).
+- Always embed temporal context ("${new Date().getFullYear()}", "latest", explicit year spans).
+- Tailor queries to the markets supported by the platform; specify product type and authority where possible.
+- Use include_domains when a competent authority site is known.
+- Seek corroboration from multiple reputable regulatory sources; log inconsistencies for follow-up.
 
-For searching:
-- PRIORITIZE SEARCH OVER CODE - Search first, search often, search comprehensively
-- Do not run all the queries at once, run them one by one, wait for the results before running the next query
-- Make 3-5 targeted searches per research topic to get different angles and perspectives
-- Search queries should be specific and focused, 5-15 words maximum
-- You can use include domains to filter results by specific websites or sources
-- Vary your search approaches: broad overview → specific details → recent developments → expert opinions
-- Use different categories strategically: news, research papers, company info, financial reports, github
-- Use X search for real-time discussions, public opinion, breaking news, and social media trends
-- Follow up initial searches with more targeted queries based on what you learn
-- Cross-reference information by searching for the same topic from different angles
-- Search for contradictory information to get balanced perspectives
-- Include exact metrics, dates, technical terms, and proper nouns in queries
-- Make searches progressively more specific as you gather context
-- Search for recent developments, trends, and updates on topics
-- Always verify information with multiple searches from different sources
+### X (Twitter) usage
+- Monitor X only for time-sensitive regulatory announcements, agency alerts, or stakeholder communications.
+- Keep queries precise, free of hashtags, and bounded by date ranges.
 
-For X search:
-- The X search tool is a powerful tool that can be used to search for recent information and discussions on X (formerly Twitter)
-- The query parameter is the search query to search for and it's very important to make it specific and focused and shouldn't be too broad and shouldn't have hashtags or other non-search terms
-- Use the handles parameter to search for specific handles, it's a list of handles to search from
-- Use the maxResults parameter to limit the number of results, it's the maximum number of results to return
-- Use the startDate and endDate parameters to limit the date range of the search, it's the start and end date of the search
-- Use the xHandles parameter to search for specific handles, it's a list of handles to search from
-- Use the maxResults parameter to limit the number of results, it's the maximum number of results to return
-- Use the startDate and endDate parameters to limit the date range of the search, it's the start and end date of the search
+### Code execution (rare)
+- Run code only to organise retrieved regulatory data (e.g., timeline tables) or to perform simple calculations (e.g., deadline intervals).
+- All scripts must end with print() and visualisations must call plt.show().
 
-### SEARCH STRATEGY EXAMPLES:
-- Topic: "AI model performance" → Search: "GPT-4 benchmark results 2025", "LLM performance comparison studies", "AI model evaluation metrics research"
-- Topic: "Company financials" → Search: "Tesla Q3 2025 earnings report", "Tesla revenue growth analysis", "electric vehicle market share 2025"
-- Topic: "Technical implementation" → Search: "React Server Components best practices", "Next.js performance optimization techniques", "modern web development patterns"
-- Topic: "Public opinion on topic" → X Search: "GPT-4 user reactions", "Tesla stock price discussions", search recent posts from specific handles if relevant
-- Topic: "Breaking news or events" → X Search: "OpenAI latest announcements", "tech conference live updates", "startup funding news"
-
-
-Only use code when:
-- You need to process or analyze data that was found through searches
-- Mathematical calculations are required that cannot be found through search
-- Creating visualizations of data trends that were discovered through research
-- The research plan specifically requests data analysis or calculations
-
-Code guidelines (when absolutely necessary):
-- Keep code simple and focused on the specific calculation or analysis needed
-- Always end with print() statements for any results
-- Prefer data visualization (line charts, bar charts only) when showing trends or any comparisons or other visualizations
-- Import required libraries: pandas, numpy, matplotlib, scipy as needed
-
-### RESEARCH WORKFLOW:
-1. Start with broad searches to understand the topic landscape
-2. Identify key subtopics and drill down with specific searches
-3. Look for recent developments and trends through targeted news/research searches
-4. Cross-validate information with searches from different categories
-5. Use code execution if mathematical analysis is needed on the gathered data or if you need or are asked to visualize the data
-6. Continue searching to fill any gaps in understanding
-
-For research:
-- Carefully follow the plan, do not skip any steps
-- Do not use the same query twice to avoid duplicates
-- Plan is limited to ${totalTodos} actions with 2 extra actions in case of errors, do not exceed this limit but use to the fullest to get the most information!
-
-Research Plan:
-${JSON.stringify(plan)}
+### Workflow expectations
+1. Confirm which required details are missing and aim early searches at filling them.
+2. Start broad, then drill down to procedural specifics, recent updates, and local obligations.
+3. Capture direct excerpts with citations; do not paraphrase beyond the source meaning.
+4. If searches fail, record the gap and suggest next steps (e.g., request user clarification).
+5. Stop once the plan is complete or the step budget is exhausted.
 `,
     prompt,
     temperature: 0,
@@ -582,7 +533,7 @@ ${JSON.stringify(plan)}
 
             const { text, sources } = await generateText({
               model: xai('grok-4-fast-non-reasoning'),
-              system: `You are a helpful assistant that searches for X posts and returns the results in a structured format. You will be given a search query and a list of X handles to search from. You will then search for the posts and return the results in a structured format. You will also cite the sources in the format [Source No.]. Go very deep in the search and return the most relevant results.`,
+              system: `You gather recent regulatory intelligence from X (Twitter). Focus on competent authorities, official stakeholders, and recognised experts. Return only factual posts relevant to life-science regulations, include inline references [Source No.], and note when few or no credible posts are found. Avoid speculation or commentary.`,
               messages: [{ role: 'user', content: query }],
               maxOutputTokens: 10,
               providerOptions: {
