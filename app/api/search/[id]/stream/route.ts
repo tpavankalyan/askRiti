@@ -49,13 +49,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const streamIds = await getStreamIdsByChatId({ chatId });
 
   if (!streamIds.length) {
-    return new ChatSDKError('not_found:stream').toResponse();
+    return new Response(null, { status: 204 });
   }
 
   const recentStreamId = streamIds.at(-1);
 
   if (!recentStreamId) {
-    return new ChatSDKError('not_found:stream').toResponse();
+    return new Response(null, { status: 204 });
   }
 
   const emptyDataStream = createUIMessageStream<ChatMessage>({

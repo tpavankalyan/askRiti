@@ -336,9 +336,28 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
             });
           }
         } else {
-          console.error('Chat error:', error.cause, error.message);
+          const rawMessage =
+            typeof error === 'string'
+              ? error
+              : typeof error?.message === 'string'
+                ? error.message
+                : 'An unexpected error occurred.';
+          const displayMessage = /<!DOCTYPE html>/i.test(rawMessage)
+            ? 'Unexpected server response. Please try again.'
+            : rawMessage;
+          const causeText =
+            typeof error?.cause === 'string'
+              ? error.cause
+              : error?.cause instanceof Error && typeof error.cause.message === 'string'
+                ? error.cause.message
+                : '';
+          if (causeText) {
+            console.error('Chat error:', causeText, rawMessage);
+          } else {
+            console.error('Chat error:', rawMessage);
+          }
           toast.error('An error occurred.', {
-            description: `Oops! An error occurred while processing your request. ${error.cause || error.message}`,
+            description: `Oops! An error occurred while processing your request. ${displayMessage}`,
           });
         }
       },

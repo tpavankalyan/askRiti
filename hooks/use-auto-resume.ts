@@ -21,7 +21,9 @@ export function useAutoResume({ autoResume, initialMessages, resumeStream, setMe
     const mostRecentMessage = initialMessages.at(-1);
 
     if (mostRecentMessage?.role === 'user') {
-      resumeStream();
+      resumeStream().catch((error) => {
+        console.warn('[useAutoResume] resumeStream failed:', error);
+      });
     }
 
     // we intentionally run this once

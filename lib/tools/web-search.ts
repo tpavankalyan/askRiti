@@ -1,4 +1,4 @@
-import { tool } from 'ai';
+import { tool, generateObject, generateText } from 'ai';
 import { z } from 'zod';
 import Exa from 'exa-js';
 import { serverEnv } from '@/env/server';
@@ -7,6 +7,7 @@ import { ChatMessage } from '../types';
 import Parallel from 'parallel-web';
 import FirecrawlApp, { SearchResultWeb, SearchResultNews, SearchResultImages, Document } from '@mendable/firecrawl-js';
 import { tavily, type TavilyClient } from '@tavily/core';
+import { ritivel } from '@/ai/providers';
 
 const extractDomain = (url: string | null | undefined): string => {
   if (!url || typeof url !== 'string') return '';
@@ -68,6 +69,112 @@ const processDomains = (domains?: (string | null)[]): string[] | undefined => {
   return processedDomains.length === 0 ? undefined : processedDomains;
 };
 
+const queryComponentExtractionSchema = z.object({
+  topic: z.array(z.string().trim().min(1)).max(5).optional(),
+  productCategory: z.array(z.string().trim().min(1)).max(5).optional(),
+  country: z.string().trim().min(1).optional(),
+});
+
+type QueryComponents = z.infer<typeof queryComponentExtractionSchema>;
+
+type FilledQueryComponents = {
+  topic: string[];
+  productCategory: string[];
+  country: string;
+};
+
+const REQUIRED_COMPONENT_LABELS: Record<keyof QueryComponents, string> = {
+  topic: 'topic(s) (e.g. regulatory focus)',
+  productCategory: 'product category/categories',
+  country: 'country or market',
+};
+
+const formatMissingComponentPrompt = (query: string, missing: (keyof QueryComponents)[]) => {
+  const labels = missing
+    .map((field) => REQUIRED_COMPONENT_LABELS[field])
+    .filter(Boolean);
+
+  if (labels.length === 0) return '';
+
+  const labelText =
+    labels.length === 1
+      ? labels[0]
+      : `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
+
+  return `To continue the regulatory search for "${query}", could you specify the ${labelText}?`;
+};
+
+const normalizeComponentList = (value?: unknown): string[] | undefined => {
+  if (!value) return undefined;
+  const arrayValue = Array.isArray(value) ? value : [value];
+  const normalized = arrayValue
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter((item) => item.length > 0);
+  return normalized.length > 0 ? Array.from(new Set(normalized)) : undefined;
+};
+
+const normalizeCountry = (value?: unknown): string | undefined => {
+  if (!value) return undefined;
+  if (Array.isArray(value)) {
+    const firstValid = value.map((item) => (typeof item === 'string' ? item.trim() : '')).find((item) => item.length > 0);
+    return firstValid || undefined;
+  }
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+};
+
+const extractQueryComponents = async (query: string): Promise<QueryComponents> => {
+  try {
+    const { object } = await generateObject({
+      model: ritivel.languageModel('ritivel-gpt5-mini'),
+      schema: queryComponentExtractionSchema,
+      prompt: `Break the following regulatory research query into up to three high-level components:
+- topic (regulatory subject, type of approval, therapeutic area, etc.). Return as a list of distinct values.
+- product category (drug class, medical device type, biologic, etc.). Return as a list of distinct values.
+- country (specific market or regulatory authority jurisdiction)
+
+Return only the fields you can confidently infer from the user's text. Keep values concise (max 6 words). If unsure, omit the field or list.
+
+User query: "${query}"`,
+      temperature: 0,
+    });
+
+    return {
+      topic: normalizeComponentList(object.topic),
+      productCategory: normalizeComponentList(object.productCategory),
+      country: normalizeCountry(object.country),
+    };
+  } catch (error) {
+    console.error('Failed to extract query components:', error);
+    return {};
+  }
+};
+
+const reformulateQueryWithComponents = async (
+  originalQuery: string,
+  components: FilledQueryComponents,
+): Promise<string> => {
+  try {
+    const { text } = await generateText({
+      model: ritivel.languageModel('ritivel-gpt5-mini'),
+      prompt: `Reformulate a regulatory search query that focuses explicitly on the provided components.
+
+Original user query: "${originalQuery}"
+Topics: ${components.topic.join('; ')}
+Product categories: ${components.productCategory.join('; ')}
+Country: ${components.country}
+Current year: ${new Date().getFullYear()}
+
+Produce a single search query (max 25 words) that is precise, includes the current year or "latest"/"current" phrasing, and emphasizes all three components. Return only the query text without additional commentary.`,
+      temperature: 0.2,
+    });
+
+    return text.trim();
+  } catch (error) {
+    console.error('Failed to reformulate search query:', error);
+    return originalQuery;
+  }
+};
+
 // Helper functions for Tavily image processing
 const sanitizeUrl = (url: string): string => {
   try {
@@ -86,6 +193,28 @@ const isValidImageUrl = async (url: string): Promise<{ valid: boolean; redirecte
   } catch {
     return { valid: false };
   }
+};
+
+const regulatoryAuthorities: Record<string, string> = {
+  Uganda: 'NDA',
+  Tanzania: 'TDMA home',
+  Azerbaijan: 'AEM',
+  Chile: 'ISP',
+  Vietnam: 'DAV Home',
+  Philippines: 'FDA Philippines',
+  Global: 'ICH',
+};
+
+const getRegulatoryAuthorityForCountry = (country: string): string | undefined => {
+  if (!country) return undefined;
+  const normalizedCountry = country.trim().toLowerCase();
+
+  const matchedEntry = Object.entries(regulatoryAuthorities).find(([key]) => key.toLowerCase() === normalizedCountry);
+  if (matchedEntry) {
+    return matchedEntry[1];
+  }
+
+  return regulatoryAuthorities.Global;
 };
 
 // Search provider strategy interface
@@ -279,14 +408,83 @@ class CDSCOSearchStrategy implements SearchStrategy {
     try {
       const perQueryPromises = limitedQueries.map(async (query, index) => {
         try {
+          const components = await extractQueryComponents(query);
+          const requiredKeys: (keyof QueryComponents)[] = ['topic', 'productCategory', 'country'];
+          console.log('components', components);
+          console.log('requiredKeys', requiredKeys);
+          const missingComponents = requiredKeys.filter((key) => {
+            const value = components[key];
+            if (Array.isArray(value)) {
+              return value.length === 0;
+            }
+            return !value || value.trim().length === 0;
+          });
+          console.log('missingComponents', missingComponents);
+          if (missingComponents.length > 0) {
+            const clarificationPrompt = formatMissingComponentPrompt(query, missingComponents);
+
+            if (clarificationPrompt) {
+              options.dataStream?.write({
+                type: 'data-appendMessage',
+                data: JSON.stringify({
+                  id: `clarification-${Date.now()}-${index}`,
+                  role: 'assistant',
+                  metadata: null,
+                  parts: [
+                    {
+                      type: 'text',
+                      text: clarificationPrompt,
+                    },
+                  ],
+                  createdAt: new Date().toISOString(),
+                }),
+                transient: true,
+              });
+            }
+
+            options.dataStream?.write({
+              type: 'data-query_completion',
+              data: {
+                query,
+                index,
+                total: limitedQueries.length,
+                status: 'error',
+                resultsCount: 0,
+                imagesCount: 0,
+              },
+            });
+
+            console.warn(`Skipping regulatory search for "${query}" due to missing components:`, missingComponents);
+            return { query, results: [], images: [] };
+          }
+
+          const filledComponents: FilledQueryComponents = {
+            topic: components.topic!,
+            productCategory: components.productCategory!,
+            country: components.country!,
+          };
+          const reformulatedQuery = await reformulateQueryWithComponents(query, filledComponents);
+
+          console.log('Regulatory search reformulated query:', {
+            originalQuery: query,
+            reformulatedQuery,
+            components: filledComponents,
+          });
+
+          const regulatoryAuthority =
+            getRegulatoryAuthorityForCountry(filledComponents.country) || options.market || 'cdsco';
+
           const response = await fetch(`${this.apiUrl}/regsearch`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ 
-              query,
-              market: options.market || 'cdsco'
+              query: reformulatedQuery,
+              market: regulatoryAuthority,
+              country: filledComponents.country,
+              topics: filledComponents.topic,
+              productCategories: filledComponents.productCategory,
             }),
           });
 
@@ -739,7 +937,7 @@ const createSearchStrategy = (
   },
 ): SearchStrategy => {
   // Only Regulatory Search (ROW markets) strategy is active - all other providers are inactive
-  return new CDSCOSearchStrategy(clients.fastapi || 'https://askriti-fastapi-195347899917.us-central1.run.app');
+  return new CDSCOSearchStrategy(clients.fastapi || 'https://askriti-gateway-6e9owv9n.uc.gateway.dev');
 };
 
 export function webSearchTool(
@@ -810,7 +1008,7 @@ export function webSearchTool(
     }) => {
       // Initialize Regulatory Search (ROW markets) client only - all other providers are inactive
       const clients = {
-        fastapi: serverEnv.FASTAPI_URL || 'https://askriti-fastapi-195347899917.us-central1.run.app',
+        fastapi: serverEnv.FASTAPI_URL || 'https://askriti-gateway-6e9owv9n.uc.gateway.dev',
       };
 
       console.log('Queries:', queries);

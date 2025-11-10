@@ -33,7 +33,11 @@ import type {
 
 import type { InferUITool, UIMessage } from 'ai';
 
-export type DataPart = { type: 'append-message'; message: string };
+export type DataPart = {
+  type: 'data-appendMessage';
+  data: string;
+  transient?: boolean;
+};
 export type DataQueryCompletionPart = {
   type: 'data-query_completion';
   data: {

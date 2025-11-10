@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
+import { Root as VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -35,19 +36,44 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Sheet
   );
 }
 
+function hasTitleNode(node: React.ReactNode): boolean {
+  return React.Children.toArray(node).some((child) => {
+    if (!React.isValidElement(child)) {
+      return false;
+    }
+
+    if (child.type === SheetPrimitive.Title) {
+      return true;
+    }
+
+    if (child.props?.children) {
+      return hasTitleNode(child.props.children);
+    }
+
+    return false;
+  });
+}
+
 function SheetContent({
   className,
   children,
   side = 'right',
+  fallbackTitle = 'Sheet panel',
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: 'top' | 'right' | 'bottom' | 'left';
+  fallbackTitle?: string;
 }) {
+  const { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, ...contentProps } = props;
+  const shouldRenderFallbackTitle = !hasTitleNode(children) && !ariaLabel && !ariaLabelledby && !!fallbackTitle;
+
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
         className={cn(
           'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
           side === 'right' &&
@@ -60,8 +86,13 @@ function SheetContent({
             'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t',
           className,
         )}
-        {...props}
+        {...contentProps}
       >
+        {shouldRenderFallbackTitle ? (
+          <VisuallyHidden asChild>
+            <SheetPrimitive.Title>{fallbackTitle}</SheetPrimitive.Title>
+          </VisuallyHidden>
+        ) : null}
         {children}
         <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
           <XIcon className="size-4" />
