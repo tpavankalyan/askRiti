@@ -530,6 +530,9 @@ class CDSCOSearchStrategy implements SearchStrategy {
             }),
           });
 
+          // console.log('request', requestBody);
+          // console.log('response', response);
+
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
