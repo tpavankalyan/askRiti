@@ -250,9 +250,7 @@ export async function POST(req: Request) {
           isProUser: false,
           messageCount: messageCountResult.count,
           extremeSearchUsage: extremeSearchUsage.count,
-          subscriptionData: user.polarSubscription
-            ? { hasSubscription: true, subscription: { ...user.polarSubscription, organizationId: null } }
-            : { hasSubscription: false },
+          subscriptionData: { hasSubscription: false },
           shouldBypassLimits,
         };
       }).catch(error => {
@@ -269,9 +267,7 @@ export async function POST(req: Request) {
         isProUser: true,
         messageCount: 0,
         extremeSearchUsage: 0,
-        subscriptionData: user?.polarSubscription
-          ? { hasSubscription: true, subscription: { ...user.polarSubscription, organizationId: null } }
-          : { hasSubscription: false },
+        subscriptionData: { hasSubscription: false },
         shouldBypassLimits: true,
       }));
     }

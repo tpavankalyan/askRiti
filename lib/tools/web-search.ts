@@ -519,22 +519,55 @@ class CDSCOSearchStrategy implements SearchStrategy {
             return { query, results: [], images: [] };
           }
 
+          const requestBody = { 
+            query: reformulatedQuery,
+            market: regulatoryAuthority
+          };
+
+          console.log('Regulatory Search API request:', {
+            url: `${this.apiUrl}/regsearch`,
+            body: requestBody,
+          });
+
           const response = await fetch(`${this.apiUrl}/regsearch`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
-              query: reformulatedQuery,
-              market: regulatoryAuthority
-            }),
+            body: JSON.stringify(requestBody),
           });
 
-          // console.log('request', requestBody);
-          // console.log('response', response);
-
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            try {
+              const errorBody = await response.json();
+              errorMessage = `HTTP error! status: ${response.status}, message: ${JSON.stringify(errorBody)}`;
+              console.error('API error response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorBody,
+                request: requestBody,
+              });
+            } catch (e) {
+              // If we can't parse the error body, try to get text
+              try {
+                const errorText = await response.text();
+                errorMessage = `HTTP error! status: ${response.status}, message: ${errorText}`;
+                console.error('API error response (text):', {
+                  status: response.status,
+                  statusText: response.statusText,
+                  body: errorText,
+                  request: requestBody,
+                });
+              } catch (textError) {
+                console.error('API error response (unable to read body):', {
+                  status: response.status,
+                  statusText: response.statusText,
+                  request: requestBody,
+                });
+              }
+            }
+            throw new Error(errorMessage);
           }
 
           const results = await response.json();

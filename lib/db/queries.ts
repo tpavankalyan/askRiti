@@ -263,13 +263,15 @@ export async function updateChatVisibilityById({
 
   try {
     console.log('📡 Executing database update for chat visibility');
-    const result = await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    const result = await db.update(chat).set({ visibility }).where(eq(chat.id, chatId)).returning();
     console.log('✅ Database update successful, result:', result);
 
     // Return a consistent, serializable structure
+    // Drizzle ORM update with returning() returns an array of updated rows
+    const rowCount = Array.isArray(result) ? result.length : 0;
     return {
       success: true,
-      rowCount: result.rowCount || 0,
+      rowCount,
       chatId,
       visibility,
     };

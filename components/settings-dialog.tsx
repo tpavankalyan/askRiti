@@ -27,9 +27,9 @@ import {
   deleteConnectorAction,
   manualSyncConnectorAction,
   getConnectorSyncStatusAction,
+  getPolarOrders,
 } from '@/app/actions';
 import { SEARCH_LIMITS } from '@/lib/constants';
-import { authClient } from '@/lib/auth-client';
 import {
   MagnifyingGlassIcon,
   LightningIcon,
@@ -1096,8 +1096,9 @@ export function SubscriptionSection({ subscriptionData, isProUser, user }: any) 
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Use data from user object (already cached)
-  const paymentHistory = user?.paymentHistory || null;
-  const dodoProStatus = user?.dodoProStatus || null;
+  // Dodo payments disabled - these properties don't exist on ComprehensiveUserData
+  const paymentHistory: any[] = [];
+  const dodoProStatus = null;
 
   useEffect(() => {
     const fetchPolarOrders = async () => {
@@ -1105,15 +1106,11 @@ export function SubscriptionSection({ subscriptionData, isProUser, user }: any) 
         setOrdersLoading(true);
 
         // Only fetch Polar orders (DodoPayments data comes from user cache)
-        const ordersResponse = await authClient.customer.orders
-          .list({
-            query: {
-              page: 1,
-              limit: 10,
-              productBillingType: 'recurring',
-            },
-          })
-          .catch(() => ({ data: null }));
+        const ordersResponse = await getPolarOrders({
+          page: 1,
+          limit: 10,
+          productBillingType: 'recurring',
+        });
 
         setOrders(ordersResponse.data);
       } catch (error) {
@@ -1156,22 +1153,18 @@ export function SubscriptionSection({ subscriptionData, isProUser, user }: any) 
   // Check for active status from either source
   const hasActiveSubscription =
     subscriptionData?.hasSubscription && subscriptionData?.subscription?.status === 'active';
-  const hasDodoProStatus = dodoProStatus?.isProUser || (user?.proSource === 'dodo' && user?.isProUser);
+  // Dodo payments disabled - always false
+  const hasDodoProStatus = false;
   const isProUserActive = hasActiveSubscription || hasDodoProStatus;
   const subscription = subscriptionData?.subscription;
 
-  // Check if DodoPayments Pro is expiring soon (within 7 days)
+  // Check if DodoPayments Pro is expiring soon (within 7 days) - Dodo payments disabled
   const getDaysUntilExpiration = () => {
-    if (!dodoProStatus?.expiresAt) return null;
-    const now = new Date();
-    const expiresAt = new Date(dodoProStatus.expiresAt);
-    const diffTime = expiresAt.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return null; // Dodo payments disabled
   };
 
-  const daysUntilExpiration = getDaysUntilExpiration();
-  const isExpiringSoon = daysUntilExpiration !== null && daysUntilExpiration <= 7 && daysUntilExpiration > 0;
+  const daysUntilExpiration = null; // Dodo payments disabled
+  const isExpiringSoon = false; // Dodo payments disabled
 
   return (
     <div className={isMobile ? 'space-y-3' : 'space-y-4'}>
@@ -1221,11 +1214,7 @@ export function SubscriptionSection({ subscriptionData, isProUser, user }: any) 
                     <span>₹1500 (One-time payment)</span>
                     <span>🇮🇳 Indian pricing</span>
                   </div>
-                  {dodoProStatus?.expiresAt && (
-                    <div className="text-[10px] opacity-75">
-                      <span>Expires: {new Date(dodoProStatus.expiresAt).toLocaleDateString()}</span>
-                    </div>
-                  )}
+                  {/* Dodo payments disabled - expiration date not available */}
                 </div>
               )}
             </div>

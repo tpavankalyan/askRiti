@@ -1373,19 +1373,34 @@ export function ChatHistoryDialog({ open, onOpenChange, user }: ChatHistoryDialo
 
 // Navigation Button component for navbar
 export function ChatHistoryButton({ onClickAction }: { onClickAction: () => void }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const renderButton = () => (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onClickAction}
+      className="size-6 !p-0 !m-0 rounded-full hover:bg-muted"
+      aria-label="Chat History"
+      type="button"
+    >
+      <HugeiconsIcon icon={SearchList02Icon} className="size-6" />
+      <span className="sr-only">Chat History</span>
+    </Button>
+  );
+
+  if (!mounted) {
+    return renderButton();
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClickAction}
-          className="size-6 !p-0 !m-0 rounded-full hover:bg-muted"
-          aria-label="Chat History"
-        >
-          <HugeiconsIcon icon={SearchList02Icon} className="size-6" />
-          <span className="sr-only">Chat History</span>
-        </Button>
+        {renderButton()}
       </TooltipTrigger>
       <TooltipContent side="bottom" sideOffset={4}>
         Chat History

@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, CreditCard, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { betterauthClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/use-location';
 import { useSession } from '@/lib/auth-client';
@@ -126,34 +125,10 @@ export default function CheckoutPage() {
   };
 
   const onSubmit = async (data: CheckoutFormData) => {
+    // DodoPayments is disabled - checkout is not available
     setIsLoading(true);
     try {
-      const { data: checkout, error } = await betterauthClient.dodopayments.checkout({
-        slug: process.env.NEXT_PUBLIC_PREMIUM_SLUG,
-        customer: {
-          email: data.customer.email,
-          name: data.customer.name,
-        },
-        billing: {
-          city: data.billing.city,
-          country: 'IN', // Always India
-          state: data.billing.state,
-          street: data.billing.street,
-          zipcode: data.billing.zipcode,
-        },
-        referenceId: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Checkout failed');
-      }
-
-      if (checkout?.url) {
-        // Redirect to DodoPayments checkout
-        window.location.href = checkout.url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
+      toast.error('Checkout is temporarily unavailable. Please use the monthly subscription option instead.');
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error(error instanceof Error ? error.message : 'Something went wrong. Please try again.');

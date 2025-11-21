@@ -38,19 +38,19 @@ export function useUserData() {
     proSource: userData?.proSource || 'none',
     subscriptionStatus: userData?.subscriptionStatus || 'none',
 
-    // Polar subscription details
-    polarSubscription: userData?.polarSubscription,
-    hasPolarSubscription: Boolean(userData?.polarSubscription),
+    // Polar subscription details (disabled)
+    polarSubscription: null,
+    hasPolarSubscription: false,
 
-    // DodoPayments details
-    dodoPayments: userData?.dodoPayments,
-    hasDodoPayments: Boolean(userData?.dodoPayments?.hasPayments),
-    dodoExpiresAt: userData?.dodoPayments?.expiresAt,
-    isDodoExpiring: Boolean(userData?.dodoPayments?.isExpiringSoon),
-    isDodoExpired: Boolean(userData?.dodoPayments?.isExpired),
+    // DodoPayments details (disabled)
+    dodoPayments: null,
+    hasDodoPayments: false,
+    dodoExpiresAt: null,
+    isDodoExpiring: false,
+    isDodoExpired: false,
 
-    // Payment history
-    paymentHistory: userData?.paymentHistory || [],
+    // Payment history (disabled - Dodo payments removed)
+    paymentHistory: [],
 
     // Rate limiting helpers
     shouldCheckLimits: !isLoading && userData && !userData.isProUser,
@@ -63,28 +63,12 @@ export function useUserData() {
     hasNoSubscription: userData?.subscriptionStatus === 'none',
 
     // Legacy compatibility helpers
-    subscriptionData: userData?.polarSubscription
-      ? {
-          hasSubscription: true,
-          subscription: userData.polarSubscription,
-        }
-      : { hasSubscription: false },
+    subscriptionData: { hasSubscription: false },
 
-    // Map dodoPayments to legacy dodoProStatus structure for settings dialog
-    dodoProStatus: userData?.dodoPayments
-      ? {
-          isProUser: userData.proSource === 'dodo' && userData.isProUser,
-          hasPayments: userData.dodoPayments.hasPayments,
-          expiresAt: userData.dodoPayments.expiresAt,
-          mostRecentPayment: userData.dodoPayments.mostRecentPayment,
-          daysUntilExpiration: userData.dodoPayments.daysUntilExpiration,
-          isExpired: userData.dodoPayments.isExpired,
-          isExpiringSoon: userData.dodoPayments.isExpiringSoon,
-          source: userData.proSource,
-        }
-      : null,
+    // Map dodoPayments to legacy dodoProStatus structure for settings dialog (disabled)
+    dodoProStatus: null,
 
-    expiresAt: userData?.dodoPayments?.expiresAt,
+    expiresAt: null,
   };
 }
 

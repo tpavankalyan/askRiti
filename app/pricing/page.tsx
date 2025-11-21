@@ -8,15 +8,8 @@ export default async function PricingPage() {
   const user = await getCurrentUser();
 
   // Extract subscription details from unified user data
-  const subscriptionDetails = user?.polarSubscription
-    ? {
-      hasSubscription: true,
-      subscription: {
-        ...user.polarSubscription,
-        organizationId: null,
-      },
-    }
-    : { hasSubscription: false };
+  // Polar is disabled - no subscriptions available
+  const subscriptionDetails = { hasSubscription: false };
 
   return (
     <div className="w-full">

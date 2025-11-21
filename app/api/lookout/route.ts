@@ -22,7 +22,6 @@ import { v7 as uuidv7 } from 'uuid';
 import { CronExpressionParser } from 'cron-parser';
 import { sendLookoutCompletionEmail } from '@/lib/email';
 import { db } from '@/lib/db';
-import { subscription, payment } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 // Import extreme search tool
@@ -32,35 +31,7 @@ import { ChatMessage } from '@/lib/types';
 // Helper function to check if a user is pro by userId
 async function checkUserIsProById(userId: string): Promise<boolean> {
   try {
-    // Check for active Polar subscription
-    const polarSubscriptions = await db.select().from(subscription).where(eq(subscription.userId, userId));
-
-    // Check if any Polar subscription is active
-    const activePolarSubscription = polarSubscriptions.find((sub) => {
-      const now = new Date();
-      const isActive = sub.status === 'active' && new Date(sub.currentPeriodEnd) > now;
-      return isActive;
-    });
-
-    if (activePolarSubscription) {
-      return true;
-    }
-
-    // Check for Dodo payments (Indian users)
-    const dodoPayments = await db.select().from(payment).where(eq(payment.userId, userId));
-
-    const successfulDodoPayments = dodoPayments
-      .filter((p) => p.status === 'succeeded')
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    if (successfulDodoPayments.length > 0) {
-      const mostRecentPayment = successfulDodoPayments[0];
-      const paymentDate = new Date(mostRecentPayment.createdAt);
-      const subscriptionEndDate = new Date(paymentDate);
-      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1); // 1 month duration
-      return subscriptionEndDate > new Date();
-    }
-
+    // Polar and DodoPayments are disabled - no subscription checks
     return false;
   } catch (error) {
     console.error('Error checking pro status:', error);

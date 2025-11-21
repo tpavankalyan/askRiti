@@ -49,14 +49,7 @@ export function Navbar({ user, isProUser, isProStatusLoading, showProBadge = fal
 
         <UserProfile
           user={user || null}
-          subscriptionData={
-            user?.polarSubscription
-              ? {
-                  hasSubscription: true,
-                  subscription: user.polarSubscription,
-                }
-              : { hasSubscription: false }
-          }
+          subscriptionData={{ hasSubscription: false }}
           isProUser={isProUser}
           isProStatusLoading={isProStatusLoading}
         />

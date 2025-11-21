@@ -56,19 +56,19 @@ export function useCachedUserData() {
     proSource,
     subscriptionStatus,
 
-    // Polar subscription details
-    polarSubscription: user?.polarSubscription,
-    hasPolarSubscription: Boolean(user?.polarSubscription),
+    // Polar subscription details (disabled)
+    polarSubscription: null,
+    hasPolarSubscription: false,
 
-    // DodoPayments details
-    dodoPayments: user?.dodoPayments,
-    hasDodoPayments: Boolean(user?.dodoPayments?.hasPayments),
-    dodoExpiresAt: user?.dodoPayments?.expiresAt,
-    isDodoExpiring: Boolean(user?.dodoPayments?.isExpiringSoon),
-    isDodoExpired: Boolean(user?.dodoPayments?.isExpired),
+    // DodoPayments details (disabled)
+    dodoPayments: null,
+    hasDodoPayments: false,
+    dodoExpiresAt: null,
+    isDodoExpiring: false,
+    isDodoExpired: false,
 
-    // Payment history
-    paymentHistory: user?.paymentHistory || [],
+    // Payment history (disabled - Dodo payments removed)
+    paymentHistory: [],
 
     // Rate limiting helpers
     shouldCheckLimits: Boolean(!isLoading && user && !user.isProUser),
@@ -81,28 +81,12 @@ export function useCachedUserData() {
     hasNoSubscription: user?.subscriptionStatus === 'none',
 
     // Legacy compatibility helpers
-    subscriptionData: user?.polarSubscription
-      ? {
-          hasSubscription: true,
-          subscription: user.polarSubscription,
-        }
-      : { hasSubscription: false },
+    subscriptionData: { hasSubscription: false },
 
-    // Map dodoPayments to legacy dodoProStatus structure for settings dialog
-    dodoProStatus: user?.dodoPayments
-      ? {
-          isProUser: proSource === 'dodo' && isProUser,
-          hasPayments: user.dodoPayments.hasPayments,
-          expiresAt: user.dodoPayments.expiresAt,
-          mostRecentPayment: user.dodoPayments.mostRecentPayment,
-          daysUntilExpiration: user.dodoPayments.daysUntilExpiration,
-          isExpired: user.dodoPayments.isExpired,
-          isExpiringSoon: user.dodoPayments.isExpiringSoon,
-          source: proSource,
-        }
-      : null,
+    // Map dodoPayments to legacy dodoProStatus structure for settings dialog (disabled)
+    dodoProStatus: null,
 
-    expiresAt: user?.dodoPayments?.expiresAt,
+    expiresAt: null,
 
     // Additional utilities
     isCached: Boolean(cachedUser),

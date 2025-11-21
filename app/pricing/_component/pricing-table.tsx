@@ -3,7 +3,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { authClient } from '@/lib/auth-client';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -11,7 +10,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PRICING, SEARCH_LIMITS } from '@/lib/constants';
 import { DiscountBanner } from '@/components/ui/discount-banner';
-import { getDiscountConfigAction } from '@/app/actions';
+import { getDiscountConfigAction, createPolarCheckout } from '@/app/actions';
 import { DiscountConfig } from '@/lib/discount';
 import { useLocation } from '@/hooks/use-location';
 import { ComprehensiveUserData } from '@/lib/user-data-server';
@@ -56,9 +55,9 @@ export default function PricingTable({ subscriptionDetails, user }: PricingTable
         id: user.id,
         isProUser: user.isProUser,
         proSource: user.proSource,
-        hasPolarSubscription: !!user.polarSubscription,
-        polarSubStatus: user.polarSubscription?.status,
-        polarSubProductId: user.polarSubscription?.productId,
+        hasPolarSubscription: false,
+        polarSubStatus: undefined,
+        polarSubProductId: undefined,
       }
       : null,
   });
@@ -182,7 +181,7 @@ export default function PricingTable({ subscriptionDetails, user }: PricingTable
           toast.success(`💰 Discount "${discountConfig.code}" applied automatically!`);
         }
 
-        await authClient.checkout({
+        const checkoutResult = await createPolarCheckout({
           products: [productId],
           slug: slug,
           allowDiscountCodes: true,
@@ -192,6 +191,12 @@ export default function PricingTable({ subscriptionDetails, user }: PricingTable
             discountId: discountIdToUse,
           }),
         });
+
+        if (checkoutResult.success && checkoutResult.url) {
+          window.location.href = checkoutResult.url;
+        } else {
+          throw new Error(checkoutResult.error || 'Failed to create checkout');
+        }
       }
     } catch (error) {
       console.error('Checkout failed:', error);
@@ -442,11 +447,6 @@ export default function PricingTable({ subscriptionDetails, user }: PricingTable
                       {subscriptionDetails.subscription.cancelAtPeriodEnd
                         ? `Subscription expires ${formatDate(subscriptionDetails.subscription.currentPeriodEnd)}`
                         : `Renews ${formatDate(subscriptionDetails.subscription.currentPeriodEnd)}`}
-                    </p>
-                  )}
-                  {getProAccessSource() === 'dodo' && user?.dodoPayments?.expiresAt && (
-                    <p className="text-sm text-muted-foreground text-center">
-                      Access expires {formatDate(new Date(user.dodoPayments.expiresAt))}
                     </p>
                   )}
                 </div>

@@ -15,7 +15,7 @@ if (!databaseUrl.includes('supabase') && !databaseUrl.includes('postgresql://'))
 // Configure postgres connection with connection pooling and better error handling
 // Supabase uses standard Postgres, so we use postgres-js which is more reliable
 // For Supabase, use connection pooling URL if available (recommended for serverless)
-const connectionOptions = {
+const connectionOptions: Parameters<typeof postgres>[1] = {
   max: 5, // Reduced pool size for better reliability
   idle_timeout: 10, // Close idle connections faster
   connect_timeout: 10, // Reduced timeout - fail fast if connection is bad
@@ -24,7 +24,7 @@ const connectionOptions = {
     undefined: null, // Transform undefined to null for Postgres compatibility
   },
   // Supabase requires SSL
-  ssl: databaseUrl.includes('supabase') ? 'require' : undefined,
+  ssl: databaseUrl.includes('supabase') ? ('require' as const) : undefined,
   // Better error handling
   onnotice: () => {}, // Suppress notices
   connection: {
@@ -115,25 +115,22 @@ export const maindb = drizzle(sql, {
 });
 
 // Only create replica databases if they're configured
-const replicas = [];
-if (sqlread1) {
-  replicas.push(
-    drizzle(sqlread1, {
+const replica1 = sqlread1
+  ? drizzle(sqlread1, {
       schema,
       ...(cacheConfig && { cache: cacheConfig }),
     })
-  );
-}
-if (sqlread2) {
-  replicas.push(
-    drizzle(sqlread2, {
+  : null;
+const replica2 = sqlread2
+  ? drizzle(sqlread2, {
       schema,
       ...(cacheConfig && { cache: cacheConfig }),
     })
-  );
-}
+  : null;
 
 // Use replicas if available, otherwise just use main database
-export const db = replicas.length > 0 
-  ? withReplicas(maindb, replicas)
+export const db = replica1 && replica2
+  ? withReplicas(maindb, [replica1, replica2])
+  : replica1
+  ? withReplicas(maindb, [replica1])
   : maindb;

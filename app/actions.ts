@@ -144,7 +144,7 @@ export async function checkImageModeration(images: string[]) {
 
 export async function generateTitleFromUserMessage({ message }: { message: UIMessage }) {
   const { text: title } = await generateText({
-    model: ritivel.languageModel('ritivel-name'),
+    model: ritivel.languageModel('ritivel-default'),
     system: `You create concise queue titles for regulatory intelligence chats used by life-science compliance teams.
 
     - Summarise the user's opening request in ≤80 characters.
@@ -152,11 +152,6 @@ export async function generateTitleFromUserMessage({ message }: { message: UIMes
     - Never add marketing language, emojis, quotes, or colons.
     - Stay factual and neutral; omit speculation.`,
     prompt: JSON.stringify(message),
-    providerOptions: {
-      groq: {
-        service_tier: 'flex',
-      },
-    },
   });
 
   return title;
@@ -1169,7 +1164,7 @@ export async function getGroupConfig(groupId: LegacyGroupId = 'web') {
   }
 
   const tools = groupTools[groupId as keyof typeof groupTools];
-  const instructions = groupInstructions[(groupId === 'buddy' ? 'web' : groupId) as keyof typeof groupInstructions];
+  const instructions = groupInstructions[groupId as keyof typeof groupInstructions];
 
   return {
     tools,
@@ -1332,12 +1327,8 @@ export async function getSubDetails() {
 
   if (!userData) return { hasSubscription: false };
 
-  return userData.polarSubscription
-    ? {
-      hasSubscription: true,
-      subscription: userData.polarSubscription,
-    }
-    : { hasSubscription: false };
+  // Polar is disabled - no subscriptions available
+  return { hasSubscription: false };
 }
 
 export async function getUserMessageCount(providedUser?: any) {
@@ -1596,16 +1587,15 @@ export async function getDodoPaymentsProStatus() {
 
   if (!userData) return { isProUser: false, hasPayments: false };
 
-  const isDodoProUser = userData.proSource === 'dodo' && userData.isProUser;
-
+  // No subscriptions available - return default values
   return {
-    isProUser: isDodoProUser,
-    hasPayments: Boolean(userData.dodoPayments?.hasPayments),
-    expiresAt: userData.dodoPayments?.expiresAt,
-    source: userData.proSource,
-    daysUntilExpiration: userData.dodoPayments?.daysUntilExpiration,
-    isExpired: userData.dodoPayments?.isExpired,
-    isExpiringSoon: userData.dodoPayments?.isExpiringSoon,
+    isProUser: false,
+    hasPayments: false,
+    expiresAt: null,
+    source: 'none' as const,
+    daysUntilExpiration: null,
+    isExpired: false,
+    isExpiringSoon: false,
   };
 }
 
@@ -1616,7 +1606,8 @@ export async function getDodoExpirationDate() {
   const { getComprehensiveUserData } = await import('@/lib/user-data-server');
   const userData = await getComprehensiveUserData();
 
-  return userData?.dodoPayments?.expiresAt || null;
+  // No subscriptions available - return null
+  return null;
 }
 
 // Initialize QStash client
@@ -2332,6 +2323,105 @@ export async function getStudentDomainsAction() {
       count: fallbackDomains.length,
       fallback: true,
       error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// Polar checkout action
+export async function createPolarCheckout(data: {
+  products: string[];
+  slug: string;
+  allowDiscountCodes?: boolean;
+  discountId?: string;
+}) {
+  'use server';
+
+  try {
+    const { Polar } = await import('@polar-sh/sdk');
+    const polar = new Polar({
+      accessToken: serverEnv.POLAR_ACCESS_TOKEN,
+    });
+
+    const checkoutLink = await polar.checkouts.create({
+      products: data.products,
+      successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/success`,
+      ...(data.discountId && { discountId: data.discountId }),
+    });
+
+    return {
+      success: true,
+      url: checkoutLink.url,
+    };
+  } catch (error) {
+    console.error('Polar checkout error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create checkout',
+    };
+  }
+}
+
+// Fetch Polar customer orders
+export async function getPolarOrders(query?: {
+  page?: number;
+  limit?: number;
+  productBillingType?: 'recurring' | 'one_time';
+}) {
+  'use server';
+
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { success: false, data: null, error: 'Not authenticated' };
+    }
+
+    const { Polar } = await import('@polar-sh/sdk');
+    const polar = new Polar({
+      accessToken: serverEnv.POLAR_ACCESS_TOKEN,
+    });
+
+    // Get customer by email - using the correct API
+    const customersResponse = await polar.customers.list({
+      email: user.email,
+      limit: 1,
+    });
+
+    // Handle paginated response
+    const customers: any[] = [];
+    for await (const customer of customersResponse) {
+      customers.push(customer);
+      if (customers.length >= 1) break;
+    }
+
+    if (customers.length === 0) {
+      return { success: true, data: null };
+    }
+
+    const customer = customers[0];
+    
+    // Fetch orders for the customer
+    const ordersResponse = await polar.orders.list({
+      customerId: customer.id,
+      ...(query || {}),
+    });
+
+    // Handle paginated orders response
+    const orders: any[] = [];
+    for await (const order of ordersResponse) {
+      orders.push(order);
+      if (query?.limit && orders.length >= query.limit) break;
+    }
+
+    return {
+      success: true,
+      data: orders,
+    };
+  } catch (error) {
+    console.error('Failed to fetch Polar orders:', error);
+    return {
+      success: false,
+      data: null,
+      error: error instanceof Error ? error.message : 'Failed to fetch orders',
     };
   }
 }
