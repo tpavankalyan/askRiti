@@ -18,11 +18,14 @@ export const serverEnv = createEnv({
     DAYTONA_API_KEY: z.string().optional().default('dev-key'),
     
     // Essential infrastructure - keep these required
+    // DATABASE_URL: Use Supabase Postgres connection string
+    // Format: postgresql://user:password@host.supabase.co:5432/postgres?sslmode=require
+    // Get it from: Supabase Dashboard > Project Settings > Database > Connection String
     DATABASE_URL: z.string().min(1),
     BETTER_AUTH_SECRET: z.string().min(1),
     REDIS_URL: z.string().min(1),
-    UPSTASH_REDIS_REST_URL: z.string().min(1),
-    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+    UPSTASH_REDIS_REST_URL: z.string().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     
     // Authentication - make optional for development
     GITHUB_CLIENT_ID: z.string().optional().default('dev-github-id'),

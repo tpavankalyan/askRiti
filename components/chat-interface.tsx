@@ -210,54 +210,34 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
       }
     }, [selectedModel, isUserPro, proStatusLoading, setSelectedModel]);
 
-    // Timer for sign-in prompt for unauthenticated users
+    // All popup dialogs disabled – ensure they stay closed
     useEffect(() => {
-      // If user becomes authenticated, reset the prompt flag and clear timer
-      if (user) {
-        if (signInTimerRef.current) {
-          clearTimeout(signInTimerRef.current);
-          signInTimerRef.current = null;
-        }
-        // Reset the flag so it can show again in future sessions if they log out
-        setPersitedHasShownSignInPrompt(false);
-        return;
+      if (signInTimerRef.current) {
+        clearTimeout(signInTimerRef.current);
+        signInTimerRef.current = null;
       }
-
-      // Only start timer if user is not authenticated and hasn't been shown the prompt yet
-      if (!user && !chatState.hasShownSignInPrompt) {
-        // Clear any existing timer
-        if (signInTimerRef.current) {
-          clearTimeout(signInTimerRef.current);
-        }
-
-        // Set timer for 1 minute (60000 ms)
-        signInTimerRef.current = setTimeout(() => {
-          dispatch({ type: 'SET_SHOW_SIGNIN_PROMPT', payload: true });
-          dispatch({ type: 'SET_HAS_SHOWN_SIGNIN_PROMPT', payload: true });
-          setPersitedHasShownSignInPrompt(true);
-        }, 60000);
-      }
-
-      // Cleanup timer on unmount
+      dispatch({ type: 'SET_SHOW_SIGNIN_PROMPT', payload: false });
+      dispatch({ type: 'SET_SHOW_UPGRADE_DIALOG', payload: false });
+      dispatch({ type: 'SET_SHOW_ANNOUNCEMENT_DIALOG', payload: false });
       return () => {
         if (signInTimerRef.current) {
           clearTimeout(signInTimerRef.current);
         }
       };
-    }, [user, chatState.hasShownSignInPrompt, setPersitedHasShownSignInPrompt]);
+    }, [dispatch]);
 
-    // Timer for lookout announcement - show after 30 seconds for authenticated users
-    useEffect(() => {
-      if (user && !chatState.hasShownAnnouncementDialog) {
-        const timer = setTimeout(() => {
-          dispatch({ type: 'SET_SHOW_ANNOUNCEMENT_DIALOG', payload: true });
-          dispatch({ type: 'SET_HAS_SHOWN_ANNOUNCEMENT_DIALOG', payload: true });
-          setPersitedHasShownLookoutAnnouncement(true);
-        }, 3000);
+    // Lookout announcement dialog disabled
+    // useEffect(() => {
+    //   if (user && !chatState.hasShownAnnouncementDialog) {
+    //     const timer = setTimeout(() => {
+    //       dispatch({ type: 'SET_SHOW_ANNOUNCEMENT_DIALOG', payload: true });
+    //       dispatch({ type: 'SET_HAS_SHOWN_ANNOUNCEMENT_DIALOG', payload: true });
+    //       setPersitedHasShownLookoutAnnouncement(true);
+    //     }, 3000);
 
-        return () => clearTimeout(timer);
-      }
-    }, [user, chatState.hasShownAnnouncementDialog, setPersitedHasShownLookoutAnnouncement]);
+    //     return () => clearTimeout(timer);
+    //   }
+    // }, [user, chatState.hasShownAnnouncementDialog, setPersitedHasShownLookoutAnnouncement]);
 
     type VisibilityType = 'public' | 'private';
 
@@ -320,15 +300,15 @@ const [searchProvider, _] = useLocalStorage<'cdsco'>(
           messagesLength: messages.length,
         });
 
-        // Show upgrade dialog after first message if user is not Pro and hasn't seen it before
-        if (isFirstMessage && !isUserPro && !proStatusLoading && !chatState.hasShownUpgradeDialog && user) {
-          console.log('Showing upgrade dialog...');
-          setTimeout(() => {
-            dispatch({ type: 'SET_SHOW_UPGRADE_DIALOG', payload: true });
-            dispatch({ type: 'SET_HAS_SHOWN_UPGRADE_DIALOG', payload: true });
-            setPersitedHasShownUpgradeDialog(true);
-          }, 1000);
-        }
+        // Upgrade dialog disabled
+        // if (isFirstMessage && !isUserPro && !proStatusLoading && !chatState.hasShownUpgradeDialog && user) {
+        //   console.log('Showing upgrade dialog...');
+        //   setTimeout(() => {
+        //     dispatch({ type: 'SET_SHOW_UPGRADE_DIALOG', payload: true });
+        //     dispatch({ type: 'SET_HAS_SHOWN_UPGRADE_DIALOG', payload: true });
+        //     setPersitedHasShownUpgradeDialog(true);
+        //   }, 1000);
+        // }
 
         // Only generate suggested questions if authenticated user or private chat
         if (message.parts && message.role === 'assistant' && (user || chatState.selectedVisibilityType === 'private')) {

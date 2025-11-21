@@ -12,19 +12,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // /api/payments/webhooks is a webhook endpoint that should be accessible without authentication
-  if (pathname.startsWith('/api/payments/webhooks')) {
-    return NextResponse.next();
-  }
-
-  // /api/auth/polar/webhooks
-  if (pathname.startsWith('/api/auth/polar/webhooks')) {
-    return NextResponse.next();
-  }
-
-  if (pathname.startsWith('/api/auth/dodopayments/webhooks')) {
-    return NextResponse.next();
-  }
+  // Payment/subscription webhooks removed - no longer needed
 
   if (pathname.startsWith('/api/raycast')) {
     return NextResponse.next();

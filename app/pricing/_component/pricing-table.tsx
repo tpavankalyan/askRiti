@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { authClient, betterauthClient } from '@/lib/auth-client';
+import { authClient } from '@/lib/auth-client';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -200,17 +200,8 @@ export default function PricingTable({ subscriptionDetails, user }: PricingTable
   };
 
   const handleManageSubscription = async () => {
-    try {
-      const proSource = getProAccessSource();
-      if (proSource === 'dodo') {
-        await betterauthClient.dodopayments.customer.portal();
-      } else {
-        await authClient.customer.portal();
-      }
-    } catch (error) {
-      console.error('Failed to open customer portal:', error);
-      toast.error('Failed to open subscription management');
-    }
+    // No subscription management - subscriptions removed
+    toast.info('Subscription management is not available');
   };
 
   const STARTER_TIER = process.env.NEXT_PUBLIC_STARTER_TIER;

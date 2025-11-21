@@ -3,14 +3,15 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { memo, useMemo } from 'react';
 import Link from 'next/link';
-import { PlusIcon, GlobeHemisphereWestIcon } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
+// import { GlobeHemisphereWestIcon } from '@phosphor-icons/react'; // Used for share indicator
 
 import { Button } from '@/components/ui/button';
-import { UserProfile, NavigationMenu } from '@/components/user-profile';
+import { UserProfile } from '@/components/user-profile';
 import { ChatHistoryButton } from '@/components/chat-history-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-import { ShareButton } from '@/components/share';
+// import { ShareButton } from '@/components/share';
 import { cn } from '@/lib/utils';
 
 import { useRouter, usePathname } from 'next/navigation';
@@ -68,7 +69,7 @@ const Navbar = memo(
       <>
         <div
           className={cn(
-            'fixed left-0 right-0 z-30 top-0 flex justify-between items-center p-3 transition-colors duration-200',
+            'fixed left-0 right-0 z-30 top-0 flex justify-between items-center px-4 py-3 transition-colors duration-200',
             isDialogOpen
               ? 'bg-transparent pointer-events-none'
               : status === 'streaming' || status === 'ready'
@@ -76,7 +77,7 @@ const Navbar = memo(
                 : 'bg-background',
           )}
         >
-          <div className={cn('flex items-center gap-3', isDialogOpen ? 'pointer-events-auto' : '')}>
+          <div className={cn('flex items-center gap-2', isDialogOpen ? 'pointer-events-auto' : '')}>
             <Button
               asChild
               variant="secondary"
@@ -88,47 +89,13 @@ const Navbar = memo(
                 <span className="text-sm ml-1.5 group-hover:block hidden animate-in fade-in duration-300">New</span>
               </Link>
             </Button>
-
-            {/* Mobile-only Upgrade (avoids overlap with share on small screens) */}
-            {user && !hasActiveSubscription && !showProLoading && (
-              <Button
-                variant="default"
-                size="sm"
-                className="rounded-md h-7 px-2 text-xs sm:hidden"
-                onClick={() => router.push('/pricing')}
-              >
-                Upgrade
-              </Button>
-            )}
           </div>
 
-          {/* Centered Upgrade Button */}
-          {user && !hasActiveSubscription && !showProLoading && (
-            <div
-              className={cn(
-                'hidden sm:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2',
-                isDialogOpen ? 'pointer-events-auto' : '',
-              )}
-            >
-              <div className="flex items-center bg-muted/50 rounded-lg border border-border">
-                <span className="px-2 py-1.5 text-sm font-medium text-muted-foreground">Free Plan</span>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="rounded-md mr-1.5 h-6"
-                  onClick={() => router.push('/pricing')}
-                >
-                  Upgrade
-                </Button>
-              </div>
-            </div>
-          )}
-          <div className={cn('flex items-center gap-1', isDialogOpen ? 'pointer-events-auto' : '')}>
-            {/* Share functionality using unified component */}
-            {chatId && (
+          <div className={cn('flex items-center gap-2', isDialogOpen ? 'pointer-events-auto' : '')}>
+            {/* Share functionality disabled */}
+            {/* {chatId && (
               <>
                 {user && isOwner ? (
-                  /* Authenticated chat owners get share functionality */
                   <ShareButton
                     chatId={chatId}
                     selectedVisibilityType={selectedVisibilityType}
@@ -142,7 +109,6 @@ const Navbar = memo(
                     disabled={false}
                   />
                 ) : (
-                  /* Non-owners (authenticated or not) just see indicator */
                   selectedVisibilityType === 'public' && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -163,7 +129,7 @@ const Navbar = memo(
                   )
                 )}
               </>
-            )}
+            )} */}
 
             {/* Subscription Status - show loading or Pro status only */}
             {user && isSearchWithId && (
@@ -199,9 +165,7 @@ const Navbar = memo(
 
             {/* Chat History Button */}
             {user && <ChatHistoryButton onClickAction={onHistoryClick} />}
-            {/* Navigation Menu - settings icon for general navigation */}
-            <NavigationMenu />
-            {/* User Profile - focused on authentication and account management */}
+            {/* User Profile - merged with navigation menu */}
             <UserProfile
               user={user}
               subscriptionData={subscriptionData}

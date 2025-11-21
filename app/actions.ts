@@ -1169,7 +1169,7 @@ export async function getGroupConfig(groupId: LegacyGroupId = 'web') {
   }
 
   const tools = groupTools[groupId as keyof typeof groupTools];
-  const instructions = getInstructionsForGroup(groupId);
+  const instructions = groupInstructions[(groupId === 'buddy' ? 'web' : groupId) as keyof typeof groupInstructions];
 
   return {
     tools,

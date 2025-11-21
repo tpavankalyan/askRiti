@@ -52,185 +52,9 @@ const VercelIcon = ({ size = 16 }: { size: number }) => {
   );
 };
 
-// Navigation Menu Component - contains all the general navigation items
-const NavigationMenu = memo(() => {
-  // const router = useRouter();
-  // const { data: session } = useSession();
-  // const isAuthenticated = !!session;
-  // const [isOpen, setIsOpen] = useState(false);
-  // const settingsIconRef = useRef<SettingsIconHandle>(null);
+// Navigation Menu Component has been merged into UserProfile
 
-  // // Control the animation based on dropdown state
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     settingsIconRef.current?.startAnimation();
-  //   } else {
-  //     settingsIconRef.current?.stopAnimation();
-  //   }
-  // }, [isOpen]);
-
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const cycleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
-    } else {
-      setTheme('light');
-    }
-  };
-
-  const getThemeIcon = () => {
-    if (!mounted) return <SunIcon size={18} />;
-    if (theme === 'dark') return <MoonStarIcon size={18} />;
-    if (theme === 'system') return <MonitorIcon size={18} />;
-    return <SunIcon size={18} />;
-  };
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={cycleTheme}
-          className="flex items-center justify-center hover:bg-accent hover:text-accent-foreground rounded-md transition-colors cursor-pointer h-6 px-2 min-w-[24px]"
-          aria-label="Toggle theme"
-        >
-          {getThemeIcon()}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" sideOffset={4}>
-        Theme
-      </TooltipContent>
-    </Tooltip>
-
-    // {/* Original menu code - commented out */}
-    // <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-    //   <Tooltip>
-    //     <TooltipTrigger asChild>
-    //       <DropdownMenuTrigger asChild>
-    //         <div className="flex items-center justify-center hover:bg-accent hover:text-accent-foreground rounded-md transition-colors cursor-pointer !size-6 !p-0 !m-0">
-    //           <SettingsIcon ref={settingsIconRef} size={18} />
-    //         </div>
-    //       </DropdownMenuTrigger>
-    //     </TooltipTrigger>
-    //     <TooltipContent side="bottom" sideOffset={4}>
-    //       Menu
-    //     </TooltipContent>
-    //   </Tooltip>
-    //   <DropdownMenuContent className="w-[240px] z-[110] mr-5">
-    //     {/* Lookout - only show if authenticated */}
-    //     {isAuthenticated && (
-    //       <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/lookout')}>
-    //         <div className="w-full flex items-center gap-2">
-    //           <HugeiconsIcon size={16} icon={BinocularsIcon} />
-    //           <span>Lookout</span>
-    //         </div>
-    //       </DropdownMenuItem>
-    //     )}
-
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <a href={'https://api.scira.ai/'} target="_blank" className="w-full flex items-center gap-2">
-    //         <CodeIcon size={16} />
-    //         <span>API</span>
-    //       </a>
-    //     </DropdownMenuItem>
-
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <Link href="/xql" className="w-full flex items-center gap-2">
-    //         <XLogoIcon size={16} />
-    //         <span>XQL</span>
-    //       </Link>
-    //     </DropdownMenuItem>
-
-    //     <DropdownMenuItem className="cursor-pointer py-1 hover:bg-transparent!">
-    //       <div className="flex items-center justify-between w-full px-0" onClick={(e) => e.stopPropagation()}>
-    //         <div className="flex items-center gap-2">
-    //           <SunIcon size={16} />
-    //           <span className="text-sm">Theme</span>
-    //         </div>
-    //         <ThemeSwitcher />
-    //       </div>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuSeparator />
-
-    //     {/* About and Information */}
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <Link href="/about" className="w-full flex items-center gap-2">
-    //         <InfoIcon size={16} />
-    //         <span>About</span>
-    //       </Link>
-    //     </DropdownMenuItem>
-    //     {/* Blog */}
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <Link href="/blog" className="w-full flex items-center gap-2">
-    //         <BookIcon size={16} />
-    //         <span>Blog</span>
-    //       </Link>
-    //     </DropdownMenuItem>
-
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <Link href="/terms" className="w-full flex items-center gap-2">
-    //         <FileTextIcon size={16} />
-    //         <span>Terms</span>
-    //       </Link>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <Link href="/privacy-policy" className="w-full flex items-center gap-2">
-    //         <ShieldIcon size={16} />
-    //         <span>Privacy</span>
-    //       </Link>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuSeparator />
-
-    //     {/* Social and External Links */}
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <a href={'https://git.new/scira'} target="_blank" className="w-full flex items-center gap-2">
-    //         <GithubLogoIcon size={16} />
-    //         <span>Github</span>
-    //       </a>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <a href={'https://x.com/sciraai'} target="_blank" className="w-full flex items-center gap-2">
-    //         <XLogoIcon size={16} />
-    //         <span>X.com</span>
-    //       </a>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <a href={'https://www.instagram.com/scira.ai'} target="_blank" className="w-full flex items-center gap-2">
-    //         <InstagramLogoIcon size={16} />
-    //         <span>Instagram</span>
-    //       </a>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <a
-    //         href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fzaidmukaddam%2Fscira&env=XAI_API_KEY,OPENAI_API_KEY,ANTHROPIC_API_KEY,GROQ_API_KEY,GOOGLE_GENERATIVE_AI_API_KEY,DAYTONA_API_KEY,E2B_API_KEY,DATABASE_URL,BETTER_AUTH_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,TWITTER_CLIENT_ID,TWITTER_CLIENT_SECRET,REDIS_URL,ELEVENLABS_API_KEY,TAVILY_API_KEY,EXA_API_KEY,TMDB_API_KEY,YT_ENDPOINT,FIRECRAWL_API_KEY,OPENWEATHER_API_KEY,SANDBOX_TEMPLATE_ID,GOOGLE_MAPS_API_KEY,MAPBOX_ACCESS_TOKEN,AVIATION_STACK_API_KEY,CRON_SECRET,BLOB_READ_WRITE_TOKEN,MEM0_API_KEY,MEM0_ORG_ID,MEM0_PROJECT_ID,SMITHERY_API_KEY,NEXT_PUBLIC_MAPBOX_TOKEN,NEXT_PUBLIC_POSTHOG_KEY,NEXT_PUBLIC_POSTHOG_HOST,NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,SCIRA_PUBLIC_API_KEY,NEXT_PUBLIC_SCIRA_PUBLIC_API_KEY&envDescription=API%20keys%20and%20configuration%20required%20for%20Scira%20to%20function"
-    //         target="_blank"
-    //         className="w-full flex items-center gap-2"
-    //       >
-    //         <VercelIcon size={14} />
-    //         <span>Deploy with Vercel</span>
-    //       </a>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem className="cursor-pointer" asChild>
-    //       <a href={'https://scira.userjot.com'} target="_blank" className="w-full flex items-center gap-2">
-    //         <BugIcon className="size-4" />
-    //         <span>Feature/Bug Request</span>
-    //       </a>
-    //     </DropdownMenuItem>
-    //   </DropdownMenuContent>
-    // </DropdownMenu>
-  );
-});
-
-NavigationMenu.displayName = 'NavigationMenu';
-
-// User Profile Component - focused on user authentication and account management
+// User Profile Component - merged with navigation menu
 const UserProfile = memo(
   ({
     className,
@@ -259,9 +83,11 @@ const UserProfile = memo(
     const [signingIn, setSigningIn] = useState(false);
     const [signInDialogOpen, setSignInDialogOpen] = useState(false);
     const [showEmail, setShowEmail] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const [blurPersonalInfo] = useLocalStorage<boolean>('scira-blur-personal-info', false);
     const { data: session, isPending } = useSession();
     const router = useRouter();
+    const settingsIconRef = useRef<SettingsIconHandle>(null);
 
     // Use passed user prop if available, otherwise fall back to session
     // BUT only use session for authentication check, not for settings dialog data
@@ -273,6 +99,15 @@ const UserProfile = memo(
 
     // Use passed Pro status instead of calculating it
     const hasActiveSubscription = isProUser;
+
+    // Control the animation based on dropdown state
+    useEffect(() => {
+      if (isOpen) {
+        settingsIconRef.current?.startAnimation();
+      } else {
+        settingsIconRef.current?.stopAnimation();
+      }
+    }, [isOpen]);
 
     if (isPending && !user) {
       return (
@@ -306,12 +141,11 @@ const UserProfile = memo(
 
     return (
       <>
-        {isAuthenticated ? (
-          // Authenticated user - show avatar dropdown with account options
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                {isAuthenticated ? (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -329,105 +163,163 @@ const UserProfile = memo(
                       </AvatarFallback>
                     </Avatar>
                   </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}>
-                Account
-              </TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent className="w-[240px] z-[110] mr-5">
-              <div className="p-3">
-                <div className="flex items-center gap-2">
-                  <Avatar className="size-8 shrink-0 rounded-md border border-neutral-200 dark:border-neutral-700">
-                    <AvatarImage
-                      src={currentUser?.image ?? ''}
-                      alt={currentUser?.name ?? ''}
-                      className={cn('rounded-md p-0 m-0 size-8', blurPersonalInfo && 'blur-sm')}
-                    />
-                    <AvatarFallback className={cn('rounded-md p-0 m-0 size-8', blurPersonalInfo && 'blur-sm')}>
-                      {currentUser?.name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col min-w-0">
-                    <p className={cn('font-medium text-sm leading-none truncate', blurPersonalInfo && 'blur-sm')}>
-                      {currentUser?.name}
-                    </p>
-                    <div className="flex items-center mt-0.5 gap-1">
-                      <div
-                        className={cn(
-                          'text-xs text-muted-foreground',
-                          showEmail ? '' : 'max-w-[160px] truncate',
-                          blurPersonalInfo && 'blur-sm',
-                        )}
-                        title={currentUser?.email || ''}
-                      >
-                        {formatEmail(currentUser?.email)}
+                ) : (
+                  <div className="flex items-center justify-center hover:bg-accent hover:text-accent-foreground rounded-md transition-colors cursor-pointer !size-6 !p-0 !m-0">
+                    <SettingsIcon ref={settingsIconRef} size={18} />
+                  </div>
+                )}
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={4}>
+              {isAuthenticated ? 'Account' : 'Menu'}
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent className="w-[240px] z-[110] mr-5">
+            {/* User info section - only show if authenticated */}
+            {isAuthenticated && (
+              <>
+                <div className="p-3">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="size-8 shrink-0 rounded-md border border-neutral-200 dark:border-neutral-700">
+                      <AvatarImage
+                        src={currentUser?.image ?? ''}
+                        alt={currentUser?.name ?? ''}
+                        className={cn('rounded-md p-0 m-0 size-8', blurPersonalInfo && 'blur-sm')}
+                      />
+                      <AvatarFallback className={cn('rounded-md p-0 m-0 size-8', blurPersonalInfo && 'blur-sm')}>
+                        {currentUser?.name?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col min-w-0">
+                      <p className={cn('font-medium text-sm leading-none truncate', blurPersonalInfo && 'blur-sm')}>
+                        {currentUser?.name}
+                      </p>
+                      <div className="flex items-center mt-0.5 gap-1">
+                        <div
+                          className={cn(
+                            'text-xs text-muted-foreground',
+                            showEmail ? '' : 'max-w-[160px] truncate',
+                            blurPersonalInfo && 'blur-sm',
+                          )}
+                          title={currentUser?.email || ''}
+                        >
+                          {formatEmail(currentUser?.email)}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowEmail(!showEmail);
+                          }}
+                          className="size-6 text-muted-foreground hover:text-foreground"
+                        >
+                          {showEmail ? <EyeSlashIcon size={12} /> : <EyeIcon size={12} />}
+                          <span className="sr-only">{showEmail ? 'Hide email' : 'Show email'}</span>
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowEmail(!showEmail);
-                        }}
-                        className="size-6 text-muted-foreground hover:text-foreground"
-                      >
-                        {showEmail ? <EyeSlashIcon size={12} /> : <EyeIcon size={12} />}
-                        <span className="sr-only">{showEmail ? 'Hide email' : 'Show email'}</span>
-                      </Button>
                     </div>
                   </div>
                 </div>
-              </div>
+                <DropdownMenuSeparator />
+              </>
+            )}
 
+            {/* Sign Up / Login - only show if not authenticated */}
+            {!isAuthenticated && (
+              <>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setSignInDialogOpen(true);
+                    setIsOpen(false);
+                  }}
+                >
+                  <div className="w-full flex items-center gap-2">
+                    <SignInIcon size={16} />
+                    <span>Sign Up / Login</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+
+            {/* Settings - disabled */}
+            {/* {isAuthenticated && (
               <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/settings')}>
                 <div className="w-full flex items-center gap-2">
                   <GearIcon size={16} />
                   <span>Settings</span>
                 </div>
               </DropdownMenuItem>
+            )} */}
+
+            {/* Lookout - disabled */}
+            {/* {isAuthenticated && (
               <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/lookout')}>
                 <div className="w-full flex items-center gap-2">
                   <HugeiconsIcon size={16} icon={BinocularsIcon} />
                   <span>Lookout</span>
                 </div>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+            )} */}
 
-              <DropdownMenuItem
-                className="cursor-pointer w-full flex items-center justify-between gap-2"
-                onClick={() =>
-                  signOut({
-                    fetchOptions: {
-                      onRequest: () => {
-                        setSigningOut(true);
-                        toast.loading('Signing out...');
+            {/* Theme switcher */}
+            <DropdownMenuItem className="cursor-pointer py-1 hover:bg-transparent!">
+              <div className="flex items-center justify-between w-full px-0" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-2">
+                  <SunIcon size={16} />
+                  <span className="text-sm">Theme</span>
+                </div>
+                <ThemeSwitcher />
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+
+            {/* About */}
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              <Link href="https://www.ritivel.com" className="w-full flex items-center gap-2" target="_blank" rel="noopener noreferrer">
+                <InfoIcon size={16} />
+                <span>About</span>
+              </Link>
+            </DropdownMenuItem>
+
+            {/* Sign Out - only show if authenticated */}
+            {isAuthenticated && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer w-full flex items-center justify-between gap-2"
+                  onClick={() =>
+                    signOut({
+                      fetchOptions: {
+                        onRequest: () => {
+                          setSigningOut(true);
+                          toast.loading('Signing out...');
+                        },
+                        onSuccess: () => {
+                          setSigningOut(false);
+                          localStorage.clear();
+                          toast.success('Signed out successfully');
+                          toast.dismiss();
+                          window.location.href = '/new';
+                        },
+                        onError: () => {
+                          setSigningOut(false);
+                          toast.error('Failed to sign out');
+                          window.location.reload();
+                        },
                       },
-                      onSuccess: () => {
-                        setSigningOut(false);
-                        localStorage.clear();
-                        toast.success('Signed out successfully');
-                        toast.dismiss();
-                        window.location.href = '/new';
-                      },
-                      onError: () => {
-                        setSigningOut(false);
-                        toast.error('Failed to sign out');
-                        window.location.reload();
-                      },
-                    },
-                  })
-                }
-              >
-                <span>Sign Out</span>
-                <SignOutIcon className="size-4" />
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          // Sign-in button temporarily hidden
-          null
-        )}
+                    })
+                  }
+                >
+                  <span>Sign Out</span>
+                  <SignOutIcon className="size-4" />
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Settings Dialog */}
         {settingsOpen !== undefined && setSettingsOpen && (
@@ -459,4 +351,4 @@ const UserProfile = memo(
 // Add a display name for the memoized component for better debugging
 UserProfile.displayName = 'UserProfile';
 
-export { UserProfile, NavigationMenu };
+export { UserProfile };

@@ -4,16 +4,22 @@ import { Redis } from '@upstash/redis';
 // Check if we're in development mode
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+// Only initialize rate limit if Upstash credentials are available
+const hasUpstashConfig = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
+
 // Create a new ratelimiter that allows 3 requests per day for unauthenticated users
 // In development, use a more lenient limit for testing
-export const unauthenticatedRateLimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: isDevelopment 
-    ? Ratelimit.slidingWindow(50, '1 h') // 50 requests per hour in development
-    : Ratelimit.slidingWindow(3, '1 d'), // 3 requests per 1 day in production
-  analytics: true,
-  prefix: '@upstash/ratelimit:unauth',
-});
+// Returns undefined if Upstash is not configured (for development)
+export const unauthenticatedRateLimit = hasUpstashConfig
+  ? new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: isDevelopment 
+        ? Ratelimit.slidingWindow(50, '1 h') // 50 requests per hour in development
+        : Ratelimit.slidingWindow(3, '1 d'), // 3 requests per 1 day in production
+      analytics: true,
+      prefix: '@upstash/ratelimit:unauth',
+    })
+  : undefined;
 
 // Helper function to get IP address from request
 export function getClientIdentifier(req: Request): string {
@@ -27,6 +33,11 @@ export function getClientIdentifier(req: Request): string {
 export async function resetRateLimits(): Promise<void> {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Rate limit reset is not allowed in production');
+  }
+  
+  if (!hasUpstashConfig) {
+    console.warn('⚠️ Upstash Redis not configured, skipping rate limit reset');
+    return;
   }
   
   try {

@@ -107,10 +107,7 @@ const SignInButton = ({ title, provider, loading, setLoading, callbackURL, icon 
  * Authentication component with social provider options
  */
 export default function AuthCard({ title, description, mode = 'sign-in' }: AuthCardProps) {
-  const [githubLoading, setGithubLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [twitterLoading, setTwitterLoading] = useState(false);
-  const [microsoftLoading, setMicrosoftLoading] = useState(false);
 
   return (
     <div className="w-full max-w-[380px] mx-auto">
@@ -122,36 +119,12 @@ export default function AuthCard({ title, description, mode = 'sign-in' }: AuthC
 
         <div className="space-y-2">
           <SignInButton
-            title="GitHub"
-            provider="github"
-            loading={githubLoading}
-            setLoading={setGithubLoading}
-            callbackURL="/"
-            icon={<AuthIcons.Github className="w-4 h-4" />}
-          />
-          <SignInButton
             title="Google"
             provider="google"
             loading={googleLoading}
             setLoading={setGoogleLoading}
             callbackURL="/"
             icon={<AuthIcons.Google className="w-4 h-4" />}
-          />
-          <SignInButton
-            title="X"
-            provider="twitter"
-            loading={twitterLoading}
-            setLoading={setTwitterLoading}
-            callbackURL="/"
-            icon={<AuthIcons.Twitter className="w-4 h-4" />}
-          />
-          <SignInButton
-            title="Microsoft"
-            provider="microsoft"
-            loading={microsoftLoading}
-            setLoading={setMicrosoftLoading}
-            callbackURL="/"
-            icon={<AuthIcons.Microsoft className="w-4 h-4" />}
           />
         </div>
 
